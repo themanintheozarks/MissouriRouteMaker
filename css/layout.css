@@ -17,8 +17,6 @@ body {
 
 body {
     font-family: var(--font-family);
-    background: var(--background-app);
-    color: var(--text-primary);
 }
 
 /* ==========================================================
@@ -45,7 +43,11 @@ body {
 
     height: var(--header-height);
 
-    padding: 0 var(--space-4);
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+
+    /* Safe Area Support */
+    padding-top: env(safe-area-inset-top);
 
     flex-shrink: 0;
 
@@ -55,6 +57,10 @@ body {
 #app-title {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ==========================================================
@@ -145,6 +151,8 @@ body {
     align-items: center;
 
     height: var(--bottom-nav-height);
+
+    padding-bottom: env(safe-area-inset-bottom);
 
     flex-shrink: 0;
 
@@ -258,9 +266,8 @@ dialog {
 
     margin: auto;
 
-    max-width: 420px;
-
     width: 90%;
+    max-width: 420px;
 
     z-index: var(--z-dialog);
 }
@@ -281,7 +288,7 @@ dialog {
 }
 
 /* ==========================================================
-   Landscape Layout
+   Landscape
    ========================================================== */
 
 @media (orientation: landscape) {
@@ -297,14 +304,24 @@ dialog {
 }
 
 /* ==========================================================
-   Tablets
+   Tablet
    ========================================================== */
 
 @media (min-width: 768px) {
 
     #app {
+
         max-width: 768px;
+
         margin: 0 auto;
+
+    }
+
+    #app-header {
+
+        padding-left: var(--space-6);
+        padding-right: var(--space-6);
+
     }
 
 }
@@ -316,7 +333,9 @@ dialog {
 @media (min-width: 1200px) {
 
     #app {
+
         max-width: 1200px;
+
     }
 
 }
