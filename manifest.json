@@ -1,0 +1,11 @@
+{
+  "name": "Missouri Route Maker",
+  "short_name": "Route Maker",
+  "description": "Offline-first route planning application.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": []
+}
