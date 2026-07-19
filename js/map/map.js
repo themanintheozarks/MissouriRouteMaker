@@ -1,17 +1,24 @@
 /*
 ==========================================================
 Missouri Route Maker
-Module 2
 
 map.js
 
 Initializes the MapLibre map.
+
 ==========================================================
 */
 
 let map = null;
 
-const MISSOURI_CENTER = [-92.603760, 38.573936];
+const MAP_STYLE =
+    "https://tiles.openfreemap.org/styles/liberty";
+
+const MISSOURI_CENTER = [
+    -92.603760,
+    38.573936
+];
+
 const DEFAULT_ZOOM = 6;
 
 export function initializeMap() {
@@ -24,7 +31,7 @@ export function initializeMap() {
 
         container: "map",
 
-        style: "https://demotiles.maplibre.org/style.json",
+        style: MAP_STYLE,
 
         center: MISSOURI_CENTER,
 
@@ -39,15 +46,39 @@ export function initializeMap() {
         "top-right"
     );
 
+    map.addControl(
+        new maplibregl.ScaleControl({
+            unit: "imperial"
+        }),
+        "bottom-right"
+    );
+
     map.on("load", () => {
-        console.log("Map loaded successfully.");
+
+        console.log("✅ Map loaded successfully.");
+
+        const gpsStatus = document.getElementById("gps-status");
+
+        if (gpsStatus) {
+            gpsStatus.textContent = "Map Loaded";
+        }
+
     });
 
     map.on("error", (e) => {
-        console.error("Map error:", e);
+
+        console.error("MapLibre Error:", e);
+
+        const gpsStatus = document.getElementById("gps-status");
+
+        if (gpsStatus) {
+            gpsStatus.textContent = "Map Error";
+        }
+
     });
 
     return map;
+
 }
 
 export function getMap() {
