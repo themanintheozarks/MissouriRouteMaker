@@ -1,21 +1,66 @@
-import { initializeMap } from "./map/map.js";
+/*
+==========================================================
+Missouri Route Maker
 
-document.addEventListener("DOMContentLoaded", () => {
+Application Entry
+==========================================================
+*/
 
-    const gpsStatus = document.getElementById("gps-status");
+import { initializeMap, getMap } from "./map/map.js";
 
-    gpsStatus.textContent = "JavaScript Started";
+function initializeApplication() {
 
-    try {
+    initializeMap();
 
-        initializeMap();
+    setupZoomButtons();
 
-        gpsStatus.textContent = "Map Initialized";
+    registerServiceWorker();
 
-    } catch (error) {
+}
 
-        gpsStatus.textContent = "ERROR: " + error.message;
+function setupZoomButtons() {
 
+    const zoomIn =
+        document.getElementById("zoom-in");
+
+    const zoomOut =
+        document.getElementById("zoom-out");
+
+    zoomIn.addEventListener("click", () => {
+
+        const map = getMap();
+
+        if (map) {
+            map.zoomIn();
+        }
+
+    });
+
+    zoomOut.addEventListener("click", () => {
+
+        const map = getMap();
+
+        if (map) {
+            map.zoomOut();
+        }
+
+    });
+
+}
+
+function registerServiceWorker() {
+
+    if (!("serviceWorker" in navigator)) {
+        return;
     }
 
-});
+    navigator.serviceWorker.register(
+        "./service-worker.js"
+    );
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeApplication
+);
