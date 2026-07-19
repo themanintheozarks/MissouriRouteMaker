@@ -1,289 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
 
+    <meta charset="UTF-8">
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <meta
-        name="description"
-        content="Missouri Route Maker - Offline-first route planning application">
+    <title>Missouri Route Maker</title>
 
     <meta
         name="theme-color"
-        content="#2563EB">
+        content="#2563eb">
 
     <meta
-        name="mobile-web-app-capable"
-        content="yes">
+        name="description"
+        content="Offline-first Missouri route planning application">
 
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes">
+    <link
+        rel="manifest"
+        href="manifest.json">
 
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="default">
+    <!-- MapLibre -->
 
-    <meta
-        name="apple-mobile-web-app-title"
-        content="Missouri Route Maker">
+    <link
+        href="https://unpkg.com/maplibre-gl@5.8.1/dist/maplibre-gl.css"
+        rel="stylesheet">
 
-    <title>Missouri Route Maker</title>
-
-    <link rel="manifest" href="manifest.json">
+    <!-- CSS -->
 
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/app.css">
+
 </head>
 
 <body>
 
-    <!-- ==========================================================
-         Application
-    =========================================================== -->
+<div id="app">
 
-    <div id="app">
+    <header id="app-header">
 
-        <!-- Header -->
+        <h1 id="app-title">
+            Missouri Route Maker
+        </h1>
 
-        <header id="app-header">
+        <button
+            id="menu-button"
+            aria-label="Menu">
 
-            <h1 id="app-title">
-                Missouri Route Maker
-            </h1>
+            ☰
 
-            <button
-                id="menu-button"
-                type="button"
-                aria-label="Open Menu">
+        </button>
 
-                ☰
+    </header>
 
-            </button>
+    <main id="main-content">
 
-        </header>
+        <div id="map-container">
 
-        <!-- Main -->
+            <div id="map"></div>
 
-        <main id="main-content">
+        </div>
 
-            <!-- Map -->
+        <div id="gps-status">
 
-            <section
-                id="map-container"
-                aria-label="Map">
+            GPS Not Connected
 
-                <div id="map"></div>
+        </div>
 
-            </section>
+        <div id="popup-container"></div>
 
-            <!-- Floating Buttons -->
+        <div id="toast-container"></div>
 
-            <button
-                id="gps-button"
-                class="floating-button"
-                type="button"
-                aria-label="Follow My Location">
+        <div id="loading-overlay" class="hidden">
 
-                📍
+            <div id="loading-spinner"></div>
 
-            </button>
+            <p>Loading...</p>
 
-            <button
-                id="route-button"
-                class="floating-button"
-                type="button"
-                aria-label="Route Builder">
+        </div>
 
-                🚗
+        <div id="zoom-controls">
 
-            </button>
+            <button id="zoom-in">+</button>
 
-            <!-- Zoom Controls -->
+            <button id="zoom-out">−</button>
 
-            <div id="zoom-controls">
+        </div>
 
-                <button
-                    id="zoom-in"
-                    type="button"
-                    aria-label="Zoom In">
+        <button
+            id="gps-button"
+            class="floating-button">
 
-                    +
+            📍
 
-                </button>
+        </button>
 
-                <button
-                    id="zoom-out"
-                    type="button"
-                    aria-label="Zoom Out">
+        <button
+            id="route-button"
+            class="floating-button">
 
-                    −
+            🚗
 
-                </button>
+        </button>
 
-            </div>
+    </main>
 
-            <!-- GPS Status -->
+    <nav id="bottom-navigation">
 
-            <div id="gps-status">
+        <button id="nav-map">
 
-                GPS Not Connected
+            🗺️
 
-            </div>
+            <span>Map</span>
 
-        </main>
+        </button>
 
-        <!-- Bottom Navigation -->
+        <button id="nav-places">
 
-        <nav id="bottom-navigation">
+            📍
 
-            <button id="nav-map" type="button">
+            <span>Places</span>
 
-                🗺️
-                <span>Map</span>
+        </button>
 
-            </button>
+        <button id="nav-routes">
 
-            <button id="nav-places" type="button">
+            🚗
 
-                📍
-                <span>Places</span>
+            <span>Routes</span>
 
-            </button>
+        </button>
 
-            <button id="nav-routes" type="button">
+        <button id="nav-settings">
 
-                🚗
-                <span>Routes</span>
+            ⚙️
 
-            </button>
+            <span>Settings</span>
 
-            <button id="nav-settings" type="button">
+        </button>
 
-                ⚙️
-                <span>Settings</span>
+    </nav>
 
-            </button>
-
-        </nav>
-
-    </div>
-
-    <!-- ==========================================================
-         Bottom Sheet
-    =========================================================== -->
-
-    <aside
-        id="bottom-sheet"
-        class="hidden">
+    <section id="bottom-sheet">
 
         <div id="bottom-sheet-content"></div>
 
-    </aside>
+    </section>
 
-    <!-- ==========================================================
-         Popup Container
-    =========================================================== -->
+</div>
 
-    <div id="popup-container"></div>
+<!-- MapLibre -->
 
-    <!-- ==========================================================
-         Toast Notifications
-    =========================================================== -->
+<script
+    src="https://unpkg.com/maplibre-gl@5.8.1/dist/maplibre-gl.js">
+</script>
 
-    <div
-        id="toast-container"
-        aria-live="polite">
+<!-- Application -->
 
-    </div>
-
-    <!-- ==========================================================
-         Loading Overlay
-    =========================================================== -->
-
-    <div
-        id="loading-overlay"
-        class="hidden">
-
-        <div id="loading-spinner"></div>
-
-        <p>Loading...</p>
-
-    </div>
-
-    <!-- ==========================================================
-         Confirmation Dialog
-    =========================================================== -->
-
-    <dialog id="confirmation-dialog">
-
-        <form method="dialog">
-
-            <h2>Confirm Action</h2>
-
-            <p id="confirmation-message"></p>
-
-            <menu>
-
-                <button
-                    id="confirm-cancel"
-                    value="cancel">
-
-                    Cancel
-
-                </button>
-
-                <button
-                    id="confirm-ok"
-                    value="default">
-
-                    Confirm
-
-                </button>
-
-            </menu>
-
-        </form>
-
-    </dialog>
-
-    <!-- ==========================================================
-         Import Progress
-    =========================================================== -->
-
-    <dialog id="progress-dialog">
-
-        <h2>Import Progress</h2>
-
-        <progress
-            id="import-progress"
-            value="0"
-            max="100">
-
-        </progress>
-
-        <p id="progress-text">
-
-            Preparing...
-
-        </p>
-
-    </dialog>
-
-    <!-- ==========================================================
-         JavaScript
-    =========================================================== -->
-
-    <script
-        type="module"
-        src="js/app.js">
-    </script>
+<script type="module" src="js/app.js"></script>
 
 </body>
 </html>
