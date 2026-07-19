@@ -1,0 +1,8 @@
+export const APP_CONFIG = {
+    APP_NAME: "Missouri Route Maker",
+    DEFAULT_LATITUDE: 38.573936,
+    DEFAULT_LONGITUDE: -92.603760,
+    DEFAULT_ZOOM: 7,
+    ARRIVAL_RADIUS_FEET: 200,
+    GPS_POLL_RATE_MS: 5000
+};
