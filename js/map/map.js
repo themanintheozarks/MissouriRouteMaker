@@ -2,59 +2,17 @@
 ==========================================================
 Missouri Route Maker
 Module 2
+
 map.js
 
 Initializes the MapLibre map.
-
-Responsibilities:
-
-- Create the map
-- Load OpenStreetMap
-- Export map instance
-
 ==========================================================
 */
 
 let map = null;
 
-/*
-==========================================================
-Map Style
-
-Using OpenFreeMap's Liberty style.
-
-This provides:
-
-- OpenStreetMap
-- No API key
-- Free usage
-- Vector tiles
-==========================================================
-*/
-
-const MAP_STYLE =
-    "https://tiles.openfreemap.org/styles/liberty";
-
-/*
-==========================================================
-Initial View
-
-Center of Missouri
-==========================================================
-*/
-
-const MISSOURI_CENTER = {
-    lng: -92.603760,
-    lat: 38.573936
-};
-
+const MISSOURI_CENTER = [-92.603760, 38.573936];
 const DEFAULT_ZOOM = 6;
-
-/*
-==========================================================
-Initialize Map
-==========================================================
-*/
 
 export function initializeMap() {
 
@@ -66,72 +24,31 @@ export function initializeMap() {
 
         container: "map",
 
-        style: MAP_STYLE,
+        style: "https://demotiles.maplibre.org/style.json",
 
-        center: [
-            MISSOURI_CENTER.lng,
-            MISSOURI_CENTER.lat
-        ],
+        center: MISSOURI_CENTER,
 
         zoom: DEFAULT_ZOOM,
 
-        attributionControl: true,
-
-        hash: false
+        attributionControl: true
 
     });
-
-    /*
-    ==========================================
-    Navigation Control
-
-    (Hidden later because we have our own
-    buttons.)
-
-    For now this helps testing.
-    ==========================================
-    */
 
     map.addControl(
         new maplibregl.NavigationControl(),
         "top-right"
     );
 
-    /*
-    ==========================================
-    Scale
-    ==========================================
-    */
-
-    map.addControl(
-        new maplibregl.ScaleControl({
-            unit: "imperial"
-        })
-    );
-
-    /*
-    ==========================================
-    Map Loaded
-    ==========================================
-    */
-
     map.on("load", () => {
+        console.log("Map loaded successfully.");
+    });
 
-        console.log(
-            "Missouri Route Maker map initialized."
-        );
-
+    map.on("error", (e) => {
+        console.error("Map error:", e);
     });
 
     return map;
-
 }
-
-/*
-==========================================================
-Getter
-==========================================================
-*/
 
 export function getMap() {
     return map;
