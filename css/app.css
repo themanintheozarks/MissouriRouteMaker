@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Missouri Route Maker
+   app.css
+   Application Styles
+   ========================================================================== */
+
+/* ==========================================================
+   Body
+   ========================================================== */
+
+body {
+    background: var(--background-app);
+    color: var(--text-primary);
+}
+
+/* ==========================================================
+   App Title
+   ========================================================== */
+
+#app-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================
+   Map
+   ========================================================== */
+
+#map {
+    background: var(--color-gray-200);
+}
+
+/* ==========================================================
+   Navigation Icons
+   ========================================================== */
+
+#bottom-navigation button span {
+    display: block;
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-1);
+}
+
+/* ==========================================================
+   Bottom Sheet Animation
+   ========================================================== */
+
+#bottom-sheet {
+    transform: translateY(100%);
+    transition: transform var(--transition-normal);
+}
+
+#bottom-sheet.open {
+    transform: translateY(0);
+}
+
+/* ==========================================================
+   Toast Animation
+   ========================================================== */
+
+.toast {
+    animation: toastIn 0.25s ease;
+}
+
+@keyframes toastIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* ==========================================================
+   Loading Spinner
+   ========================================================== */
+
+#loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* ==========================================================
+   Dialog Buttons
+   ========================================================== */
+
+dialog button {
+
+    padding: var(--space-3) var(--space-4);
+
+    border-radius: var(--border-radius-medium);
+
+    font-weight: var(--font-weight-medium);
+}
+
+#confirm-ok {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+#confirm-cancel {
+    background: var(--color-gray-200);
+    color: var(--text-primary);
+}
+
+/* ==========================================================
+   Progress Dialog
+   ========================================================== */
+
+#progress-text {
+    text-align: center;
+    font-size: var(--font-size-sm);
+}
+
+/* ==========================================================
+   Hidden Utility
+   ========================================================== */
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================
+   Scrollbars
+   ========================================================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-app);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-gray-400);
+    border-radius: var(--border-radius-round);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-500);
+}
+
+/* ==========================================================
+   Selection
+   ========================================================== */
+
+::selection {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* ==========================================================
+   Safe Area Support
+   ========================================================== */
+
+#app-header {
+    padding-top: env(safe-area-inset-top);
+}
+
+#bottom-navigation {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ==========================================================
+   Responsive Adjustments
+   ========================================================== */
+
+@media (max-width: 480px) {
+
+    #app-title {
+        font-size: var(--font-size-md);
+    }
+
+    .floating-button {
+        width: 52px;
+        height: 52px;
+    }
+
+}
+
+@media (min-width: 768px) {
+
+    #app-header {
+        padding-left: var(--space-6);
+        padding-right: var(--space-6);
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+
+    }
+
+}
+
+/* ==========================================================
+   Print
+   ========================================================== */
+
+@media print {
+
+    #bottom-navigation,
+    #gps-button,
+    #route-button,
+    #zoom-controls,
+    #loading-overlay {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+
+}
