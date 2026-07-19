@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Missouri Route Maker
+   layout.css
+   Application Layout
+   ========================================================================== */
+
+/* ==========================================================
+   Document
+   ========================================================== */
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--background-app);
+    color: var(--text-primary);
+}
+
+/* ==========================================================
+   Application Container
+   ========================================================== */
+
+#app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ==========================================================
+   Header
+   ========================================================== */
+
+#app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: var(--header-height);
+
+    padding: 0 var(--space-4);
+
+    flex-shrink: 0;
+
+    z-index: var(--z-header);
+}
+
+#app-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+/* ==========================================================
+   Main Content
+   ========================================================== */
+
+#main-content {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ==========================================================
+   Map
+   ========================================================== */
+
+#map-container,
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* ==========================================================
+   Floating Buttons
+   ========================================================== */
+
+.floating-button {
+    position: absolute;
+
+    width: var(--floating-button-size);
+    height: var(--floating-button-size);
+
+    right: var(--space-4);
+
+    z-index: var(--z-floating-buttons);
+}
+
+#gps-button {
+    bottom: 170px;
+}
+
+#route-button {
+    bottom: 100px;
+}
+
+/* ==========================================================
+   Zoom Controls
+   ========================================================== */
+
+#zoom-controls {
+    position: absolute;
+
+    left: var(--space-4);
+    bottom: 100px;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    z-index: var(--z-floating-buttons);
+}
+
+/* ==========================================================
+   GPS Status
+   ========================================================== */
+
+#gps-status {
+    position: absolute;
+
+    top: var(--space-4);
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    z-index: var(--z-floating-buttons);
+}
+
+/* ==========================================================
+   Bottom Navigation
+   ========================================================== */
+
+#bottom-navigation {
+
+    display: flex;
+
+    justify-content: space-around;
+
+    align-items: center;
+
+    height: var(--bottom-nav-height);
+
+    flex-shrink: 0;
+
+    z-index: var(--z-bottom-nav);
+}
+
+#bottom-navigation button {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: var(--space-1);
+
+    flex: 1;
+
+    height: 100%;
+}
+
+/* ==========================================================
+   Bottom Sheet
+   ========================================================== */
+
+#bottom-sheet {
+
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    min-height: var(--bottom-sheet-min-height);
+    max-height: var(--bottom-sheet-max-height);
+
+    overflow-y: auto;
+
+    z-index: var(--z-bottom-sheet);
+}
+
+#bottom-sheet-content {
+    padding: var(--space-4);
+}
+
+/* ==========================================================
+   Popup Container
+   ========================================================== */
+
+#popup-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--z-popup);
+}
+
+/* ==========================================================
+   Toast Container
+   ========================================================== */
+
+#toast-container {
+
+    position: fixed;
+
+    left: 50%;
+    bottom: 90px;
+
+    transform: translateX(-50%);
+
+    width: min(90%, 420px);
+
+    z-index: var(--z-toast);
+}
+
+/* ==========================================================
+   Loading Overlay
+   ========================================================== */
+
+#loading-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: var(--space-4);
+
+    z-index: var(--z-loading);
+}
+
+#loading-spinner {
+
+    width: 48px;
+    height: 48px;
+}
+
+/* ==========================================================
+   Dialogs
+   ========================================================== */
+
+dialog {
+
+    margin: auto;
+
+    max-width: 420px;
+
+    width: 90%;
+
+    z-index: var(--z-dialog);
+}
+
+/* ==========================================================
+   Progress Dialog
+   ========================================================== */
+
+#progress-dialog {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: var(--space-4);
+
+    padding: var(--space-5);
+}
+
+/* ==========================================================
+   Landscape Layout
+   ========================================================== */
+
+@media (orientation: landscape) {
+
+    #gps-button {
+        bottom: 120px;
+    }
+
+    #route-button {
+        bottom: 50px;
+    }
+
+}
+
+/* ==========================================================
+   Tablets
+   ========================================================== */
+
+@media (min-width: 768px) {
+
+    #app {
+        max-width: 768px;
+        margin: 0 auto;
+    }
+
+}
+
+/* ==========================================================
+   Desktop
+   ========================================================== */
+
+@media (min-width: 1200px) {
+
+    #app {
+        max-width: 1200px;
+    }
+
+}
