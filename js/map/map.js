@@ -4,8 +4,7 @@ Missouri Route Maker
 
 map.js
 
-Initializes the MapLibre map.
-
+Map Module
 ==========================================================
 */
 
@@ -41,11 +40,7 @@ export function initializeMap() {
 
     });
 
-    map.addControl(
-        new maplibregl.NavigationControl(),
-        "top-right"
-    );
-
+    // Keep only the scale bar.
     map.addControl(
         new maplibregl.ScaleControl({
             unit: "imperial"
@@ -55,24 +50,13 @@ export function initializeMap() {
 
     map.on("load", () => {
 
-        console.log("✅ Map loaded successfully.");
+        console.log("Map Loaded");
 
-        const gpsStatus = document.getElementById("gps-status");
+        const gpsStatus =
+            document.getElementById("gps-status");
 
         if (gpsStatus) {
             gpsStatus.textContent = "Map Loaded";
-        }
-
-    });
-
-    map.on("error", (e) => {
-
-        console.error("MapLibre Error:", e);
-
-        const gpsStatus = document.getElementById("gps-status");
-
-        if (gpsStatus) {
-            gpsStatus.textContent = "Map Error";
         }
 
     });
