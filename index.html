@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta
+        name="description"
+        content="Missouri Route Maker - Offline-first route planning application">
+
+    <meta
+        name="theme-color"
+        content="#2563EB">
+
+    <meta
+        name="mobile-web-app-capable"
+        content="yes">
+
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default">
+
+    <meta
+        name="apple-mobile-web-app-title"
+        content="Missouri Route Maker">
+
+    <title>Missouri Route Maker</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+
+    <!-- ==========================================================
+         Application
+    =========================================================== -->
+
+    <div id="app">
+
+        <!-- Header -->
+
+        <header id="app-header">
+
+            <h1 id="app-title">
+                Missouri Route Maker
+            </h1>
+
+            <button
+                id="menu-button"
+                type="button"
+                aria-label="Open Menu">
+
+                ☰
+
+            </button>
+
+        </header>
+
+        <!-- Main -->
+
+        <main id="main-content">
+
+            <!-- Map -->
+
+            <section
+                id="map-container"
+                aria-label="Map">
+
+                <div id="map"></div>
+
+            </section>
+
+            <!-- Floating Buttons -->
+
+            <button
+                id="gps-button"
+                class="floating-button"
+                type="button"
+                aria-label="Follow My Location">
+
+                📍
+
+            </button>
+
+            <button
+                id="route-button"
+                class="floating-button"
+                type="button"
+                aria-label="Route Builder">
+
+                🚗
+
+            </button>
+
+            <!-- Zoom Controls -->
+
+            <div id="zoom-controls">
+
+                <button
+                    id="zoom-in"
+                    type="button"
+                    aria-label="Zoom In">
+
+                    +
+
+                </button>
+
+                <button
+                    id="zoom-out"
+                    type="button"
+                    aria-label="Zoom Out">
+
+                    −
+
+                </button>
+
+            </div>
+
+            <!-- GPS Status -->
+
+            <div id="gps-status">
+
+                GPS Not Connected
+
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+
+        <nav id="bottom-navigation">
+
+            <button id="nav-map" type="button">
+
+                🗺️
+                <span>Map</span>
+
+            </button>
+
+            <button id="nav-places" type="button">
+
+                📍
+                <span>Places</span>
+
+            </button>
+
+            <button id="nav-routes" type="button">
+
+                🚗
+                <span>Routes</span>
+
+            </button>
+
+            <button id="nav-settings" type="button">
+
+                ⚙️
+                <span>Settings</span>
+
+            </button>
+
+        </nav>
+
+    </div>
+
+    <!-- ==========================================================
+         Bottom Sheet
+    =========================================================== -->
+
+    <aside
+        id="bottom-sheet"
+        class="hidden">
+
+        <div id="bottom-sheet-content"></div>
+
+    </aside>
+
+    <!-- ==========================================================
+         Popup Container
+    =========================================================== -->
+
+    <div id="popup-container"></div>
+
+    <!-- ==========================================================
+         Toast Notifications
+    =========================================================== -->
+
+    <div
+        id="toast-container"
+        aria-live="polite">
+
+    </div>
+
+    <!-- ==========================================================
+         Loading Overlay
+    =========================================================== -->
+
+    <div
+        id="loading-overlay"
+        class="hidden">
+
+        <div id="loading-spinner"></div>
+
+        <p>Loading...</p>
+
+    </div>
+
+    <!-- ==========================================================
+         Confirmation Dialog
+    =========================================================== -->
+
+    <dialog id="confirmation-dialog">
+
+        <form method="dialog">
+
+            <h2>Confirm Action</h2>
+
+            <p id="confirmation-message"></p>
+
+            <menu>
+
+                <button
+                    id="confirm-cancel"
+                    value="cancel">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    id="confirm-ok"
+                    value="default">
+
+                    Confirm
+
+                </button>
+
+            </menu>
+
+        </form>
+
+    </dialog>
+
+    <!-- ==========================================================
+         Import Progress
+    =========================================================== -->
+
+    <dialog id="progress-dialog">
+
+        <h2>Import Progress</h2>
+
+        <progress
+            id="import-progress"
+            value="0"
+            max="100">
+
+        </progress>
+
+        <p id="progress-text">
+
+            Preparing...
+
+        </p>
+
+    </dialog>
+
+    <!-- ==========================================================
+         JavaScript
+    =========================================================== -->
+
+    <script
+        type="module"
+        src="js/app.js">
+    </script>
+
+</body>
+</html>
