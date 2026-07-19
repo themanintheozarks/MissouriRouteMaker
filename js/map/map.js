@@ -3,8 +3,6 @@
 Missouri Route Maker
 
 map.js
-
-Map Module
 ==========================================================
 */
 
@@ -28,37 +26,35 @@ export function initializeMap() {
 
         console.log("Map Loaded");
 
-        const status = document.getElementById("gps-status");
+        document.getElementById("gps-status").textContent = "Map Loaded";
 
-        if (status) {
+        // Wire our custom buttons AFTER the map exists
 
-            status.textContent = "Map Loaded";
+        document.getElementById("zoom-in").onclick = () => {
 
-        }
+            map.zoomIn();
+
+        };
+
+        document.getElementById("zoom-out").onclick = () => {
+
+            map.zoomOut();
+
+        };
+
+        document.getElementById("gps-button").onclick = () => {
+
+            alert("GPS button coming next.");
+
+        };
+
+        document.getElementById("route-button").onclick = () => {
+
+            alert("Route Planner coming next.");
+
+        };
 
     });
-
-    initializeButtons();
-
-}
-
-function initializeButtons() {
-
-    const zoomIn = document.getElementById("zoom-in");
-
-    const zoomOut = document.getElementById("zoom-out");
-
-    if (zoomIn) {
-
-        zoomIn.onclick = () => map.zoomIn();
-
-    }
-
-    if (zoomOut) {
-
-        zoomOut.onclick = () => map.zoomOut();
-
-    }
 
 }
 
