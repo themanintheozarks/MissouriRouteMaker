@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -10,30 +12,48 @@
     <title>Missouri Route Maker</title>
 
     <meta
-        name="theme-color"
-        content="#2563eb">
-
-    <meta
         name="description"
         content="Offline-first Missouri route planning application">
+
+    <meta
+        name="theme-color"
+        content="#2563eb">
 
     <link
         rel="manifest"
         href="manifest.json">
 
-    <!-- MapLibre -->
+    <!-- ======================================================
+         MapLibre GL JS
+         ====================================================== -->
 
     <link
-        href="https://unpkg.com/maplibre-gl@5.8.1/dist/maplibre-gl.css"
-        rel="stylesheet">
+        rel="stylesheet"
+        href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 
-    <!-- CSS -->
+    <!-- ======================================================
+         Application Styles
+         ====================================================== -->
 
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/app.css">
+    <link
+        rel="stylesheet"
+        href="css/reset.css">
+
+    <link
+        rel="stylesheet"
+        href="css/variables.css">
+
+    <link
+        rel="stylesheet"
+        href="css/layout.css">
+
+    <link
+        rel="stylesheet"
+        href="css/components.css">
+
+    <link
+        rel="stylesheet"
+        href="css/app.css">
 
 </head>
 
@@ -41,10 +61,16 @@
 
 <div id="app">
 
+    <!-- ======================================================
+         Header
+         ====================================================== -->
+
     <header id="app-header">
 
         <h1 id="app-title">
+
             Missouri Route Maker
+
         </h1>
 
         <button
@@ -56,6 +82,10 @@
         </button>
 
     </header>
+
+    <!-- ======================================================
+         Main Content
+         ====================================================== -->
 
     <main id="main-content">
 
@@ -75,7 +105,9 @@
 
         <div id="toast-container"></div>
 
-        <div id="loading-overlay" class="hidden">
+        <div
+            id="loading-overlay"
+            class="hidden">
 
             <div id="loading-spinner"></div>
 
@@ -83,13 +115,7 @@
 
         </div>
 
-        <div id="zoom-controls">
-
-            <button id="zoom-in">+</button>
-
-            <button id="zoom-out">−</button>
-
-        </div>
+        <!-- Floating Buttons -->
 
         <button
             id="gps-button"
@@ -107,7 +133,29 @@
 
         </button>
 
+        <!-- Zoom Controls -->
+
+        <div id="zoom-controls">
+
+            <button id="zoom-in">
+
+                +
+
+            </button>
+
+            <button id="zoom-out">
+
+                −
+
+            </button>
+
+        </div>
+
     </main>
+
+    <!-- ======================================================
+         Bottom Navigation
+         ====================================================== -->
 
     <nav id="bottom-navigation">
 
@@ -145,6 +193,10 @@
 
     </nav>
 
+    <!-- ======================================================
+         Bottom Sheet
+         ====================================================== -->
+
     <section id="bottom-sheet">
 
         <div id="bottom-sheet-content"></div>
@@ -153,15 +205,21 @@
 
 </div>
 
-<!-- MapLibre -->
+<!-- ==========================================================
+     MapLibre
+     ========================================================== -->
+
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+
+<!-- ==========================================================
+     Application
+     ========================================================== -->
 
 <script
-    src="https://unpkg.com/maplibre-gl@5.8.1/dist/maplibre-gl.js">
+    type="module"
+    src="js/app.js">
 </script>
 
-<!-- Application -->
-
-<script type="module" src="js/app.js"></script>
-
 </body>
+
 </html>
