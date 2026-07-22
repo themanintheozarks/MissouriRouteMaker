@@ -1,9 +1,23 @@
-self.addEventListener("install", event => {
+/*
+==========================================================
+Missouri Route Maker
+
+Temporary Service Worker
+
+Disabled during development to prevent stale cached files.
+==========================================================
+*/
+
+self.addEventListener("install", (event) => {
     self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
-    event.waitUntil(self.clients.claim());
+self.addEventListener("activate", (event) => {
+    event.waitUntil(
+        self.registration.unregister().then(() => {
+            return self.clients.matchAll();
+        }).then((clients) => {
+            clients.forEach((client) => client.navigate(client.url));
+        })
+    );
 });
-
-self.addEventListener("fetch", () => {});
