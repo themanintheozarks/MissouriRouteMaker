@@ -28,7 +28,13 @@ export function initializeGPS() {
         return;
     }
 
-    gpsButton.onclick = requestLocation;
+    gpsButton.onclick = () => {
+
+    alert("GPS button clicked");
+
+    requestLocation();
+
+};
 
 }
 
