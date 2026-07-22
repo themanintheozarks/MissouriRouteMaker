@@ -2,21 +2,41 @@
 ==========================================================
 Missouri Route Maker
 
-Application Entry
+app.js
+
+Application Entry Point
+
 ==========================================================
 */
 
-import { initializeMap, getMap } from "./map/map.js";
+import { initializeMap } from "./map/map.js";
+import { initializeGPS } from "./gps.js";
+
+/*
+==========================================================
+Initialize Application
+==========================================================
+*/
 
 function initializeApplication() {
 
+    console.log("Missouri Route Maker Starting...");
+
     initializeMap();
+
+    initializeGPS();
 
     setupZoomButtons();
 
     registerServiceWorker();
 
 }
+
+/*
+==========================================================
+Custom Zoom Buttons
+==========================================================
+*/
 
 function setupZoomButtons() {
 
@@ -26,27 +46,25 @@ function setupZoomButtons() {
     const zoomOut =
         document.getElementById("zoom-out");
 
-    zoomIn.addEventListener("click", () => {
+    zoomIn.onclick = () => {
 
-        const map = getMap();
+        window.map.zoomIn();
 
-        if (map) {
-            map.zoomIn();
-        }
+    };
 
-    });
+    zoomOut.onclick = () => {
 
-    zoomOut.addEventListener("click", () => {
+        window.map.zoomOut();
 
-        const map = getMap();
-
-        if (map) {
-            map.zoomOut();
-        }
-
-    });
+    };
 
 }
+
+/*
+==========================================================
+Service Worker
+==========================================================
+*/
 
 function registerServiceWorker() {
 
@@ -59,6 +77,12 @@ function registerServiceWorker() {
     );
 
 }
+
+/*
+==========================================================
+Start
+==========================================================
+*/
 
 document.addEventListener(
     "DOMContentLoaded",
