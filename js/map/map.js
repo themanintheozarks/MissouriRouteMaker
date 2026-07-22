@@ -42,12 +42,6 @@ export function initializeMap() {
 
         };
 
-        document.getElementById("gps-button").onclick = () => {
-
-            alert("GPS button coming next.");
-
-        };
-
         document.getElementById("route-button").onclick = () => {
 
             alert("Route Planner coming next.");
