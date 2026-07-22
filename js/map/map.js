@@ -6,7 +6,7 @@ map.js
 ==========================================================
 */
 
-let map;
+let map = null;
 
 export function initializeMap() {
 
@@ -22,13 +22,14 @@ export function initializeMap() {
 
     });
 
+    // Make the map available globally
+    window.map = map;
+
     map.on("load", () => {
 
         console.log("Map Loaded");
 
-        document.getElementById("gps-status").textContent = "Map Loaded";
-
-        // Wire our custom buttons AFTER the map exists
+        document.getElementById("gps-status").textContent = "Map Ready";
 
         document.getElementById("zoom-in").onclick = () => {
 
@@ -44,7 +45,7 @@ export function initializeMap() {
 
         document.getElementById("route-button").onclick = () => {
 
-            alert("Route Planner coming next.");
+            alert("Route Planner coming in a future module.");
 
         };
 
