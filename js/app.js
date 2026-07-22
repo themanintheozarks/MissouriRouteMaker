@@ -11,6 +11,7 @@ Application Entry Point
 
 import { initializeMap } from "./map/map.js";
 import { initializeGPS } from "./gps.js";
+import { initializePlaces } from "./places.js";
 
 /*
 ==========================================================
@@ -24,39 +25,22 @@ function initializeApplication() {
 
     initializeMap();
 
-    initializeGPS();
+    /*
+    ==========================================
+    Wait until the map is fully loaded before
+    initializing modules that depend on it.
+    ==========================================
+    */
 
-    setupZoomButtons();
+    window.map.on("load", () => {
+
+        initializeGPS();
+
+        initializePlaces();
+
+    });
 
     registerServiceWorker();
-
-}
-
-/*
-==========================================================
-Custom Zoom Buttons
-==========================================================
-*/
-
-function setupZoomButtons() {
-
-    const zoomIn =
-        document.getElementById("zoom-in");
-
-    const zoomOut =
-        document.getElementById("zoom-out");
-
-    zoomIn.onclick = () => {
-
-        window.map.zoomIn();
-
-    };
-
-    zoomOut.onclick = () => {
-
-        window.map.zoomOut();
-
-    };
 
 }
 
