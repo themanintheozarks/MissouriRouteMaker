@@ -4,31 +4,34 @@ Missouri Route Maker
 
 places.js
 
-Temporary Places Module
+Places Module
+(Milestone 1)
 
 ==========================================================
 */
 
 import { getMap } from "./map/map.js";
 
-const places = [];
+let places = [];
 
 export function initializePlaces() {
 
     const map = getMap();
 
-    map.on("click", onMapClick);
+    if (!map) {
+        return;
+    }
+
+    map.on("click", createPlace);
 
 }
 
-function onMapClick(event) {
+function createPlace(event) {
 
-    const name = prompt("Place name:");
+    const name = prompt("Enter place name:");
 
     if (!name) {
-
         return;
-
     }
 
     const marker = new maplibregl.Marker({
@@ -37,7 +40,12 @@ function onMapClick(event) {
 
     })
 
-    .setLngLat(event.lngLat)
+    .setLngLat([
+
+        event.lngLat.lng,
+        event.lngLat.lat
+
+    ])
 
     .setPopup(
 
@@ -53,14 +61,14 @@ function onMapClick(event) {
 
         name,
 
-        marker,
+        latitude: event.lngLat.lat,
 
-        lng: event.lngLat.lng,
+        longitude: event.lngLat.lng,
 
-        lat: event.lngLat.lat
+        marker
 
     });
 
-    console.log("Places:", places);
+    console.log(places);
 
 }
