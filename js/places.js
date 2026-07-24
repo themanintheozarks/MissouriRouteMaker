@@ -4,60 +4,70 @@ Missouri Route Maker
 
 places.js
 
-Places Module
-(Milestone 1)
+Permanent Places
 
 ==========================================================
 */
 
 import { getMap } from "./map/map.js";
 
-let places = [];
+import {
 
-export function initializePlaces() {
+    savePlace,
+
+    loadPlaces
+
+} from "./database.js";
+
+/*
+==========================================================
+Initialize
+==========================================================
+*/
+
+export async function initializePlaces() {
 
     const map = getMap();
 
-    if (!map) {
-        return;
-    }
+    if (!map) return;
 
-    map.on("click", createPlace);
+    map.on("click", addPlace);
+
+    await restorePlaces();
 
 }
 
-function createPlace(event) {
+/*
+==========================================================
+Restore Saved Places
+==========================================================
+*/
 
-    const name = prompt("Enter place name:");
+async function restorePlaces() {
 
-    if (!name) {
-        return;
-    }
+    const places = await loadPlaces();
 
-    const marker = new maplibregl.Marker({
+    places.forEach(place => {
 
-        color: "#16a34a"
+        drawPlace(place);
 
-    })
+    });
 
-    .setLngLat([
+}
 
-        event.lngLat.lng,
-        event.lngLat.lat
+/*
+==========================================================
+Map Click
+==========================================================
+*/
 
-    ])
+async function addPlace(event) {
 
-    .setPopup(
+    const name = prompt("Enter place name");
 
-        new maplibregl.Popup()
+    if (!name) return;
 
-        .setText(name)
-
-    )
-
-    .addTo(getMap());
-
-    places.push({
+    const place = {
 
         name,
 
@@ -65,10 +75,52 @@ function createPlace(event) {
 
         longitude: event.lngLat.lng,
 
-        marker
+        status: "green",
 
-    });
+        rating: 0,
 
-    console.log(places);
+        notes: "",
+
+        categories: []
+
+    };
+
+    await savePlace(place);
+
+    drawPlace(place);
+
+}
+
+/*
+==========================================================
+Draw Marker
+==========================================================
+*/
+
+function drawPlace(place) {
+
+    new maplibregl.Marker({
+
+        color: "#16a34a"
+
+    })
+
+    .setLngLat([
+
+        place.longitude,
+
+        place.latitude
+
+    ])
+
+    .setPopup(
+
+        new maplibregl.Popup()
+
+        .setText(place.name)
+
+    )
+
+    .addTo(getMap());
 
 }
