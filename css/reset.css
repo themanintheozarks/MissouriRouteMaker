@@ -1,40 +1,48 @@
-/* ==========================================================================
-   Missouri Route Maker
-   reset.css
-   Browser Reset & Base Defaults
-   ========================================================================== */
+/*
+==========================================================
+Missouri Route Maker
 
-/* Box sizing */
+reset.css
+Modern CSS Reset & Baseline Styles
+==========================================================
+*/
 
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     box-sizing: border-box;
-}
-
-/* Remove default spacing */
-
-* {
     margin: 0;
     padding: 0;
 }
 
-/* Base document */
-
-html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-}
-
-body {
-    min-height: 100vh;
-    text-rendering: optimizeLegibility;
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
 }
 
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+img, svg {
+    display: block;
+    max-width: 100%;
+}
 /* Media */
 
 img,
