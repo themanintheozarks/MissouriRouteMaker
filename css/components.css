@@ -1,40 +1,140 @@
-/* ==========================================================================
-   Missouri Route Maker
-   components.css
-   ========================================================================== */
+/*
+==========================================================
+Missouri Route Maker
+
+components.css
+UI Controls, Bottom Sheets, Drawers & Popups
+==========================================================
+*/
 
 /* Buttons */
-
-button {
-    font: inherit;
-    cursor: pointer;
-    border: none;
-    outline: none;
-}
-
-/* Floating Action Buttons */
-
-.floating-button {
-    width: 56px;
-    height: 56px;
-
-    border-radius: 50%;
-
-    background: #2563eb;
-    color: white;
-
-    font-size: 24px;
-
-    display: flex;
+.btn {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
 }
 
-/* Zoom Controls */
+.btn:active {
+    transform: scale(0.98);
+}
 
-#zoom-controls {
+.btn-primary { background: var(--color-primary); color: var(--text-inverse); }
+.btn-primary:hover { background: var(--color-primary-hover); }
+
+.btn-success { background: var(--color-status-green); color: var(--text-inverse); }
+.btn-success:hover { background: var(--color-status-green-hover); }
+
+.btn-secondary { background: var(--bg-interactive); color: var(--text-primary); border: 1px solid var(--border-strong); }
+.btn-secondary:hover { background: var(--bg-interactive-hover); }
+
+.btn-danger { background: #dc2626; color: var(--text-inverse); }
+.btn-danger:hover { background: #b91c1c; }
+
+/* Form Controls */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.form-input, .form-select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.form-input:focus, .form-select:focus, textarea:focus {
+    border-color: var(--color-primary);
+}
+
+/* Star Rating Control (1–5 Gold Stars) */
+.star-rating-control {
+    display: flex;
+    gap: 8px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.star-rating-control .star {
+    color: var(--border-strong);
+    transition: color var(--transition-fast);
+}
+
+.star-rating-control .star.active {
+    color: #f59e0b; /* Gold Star */
+}
+
+/* Bottom Sheet Overlay & Editor Container */
+.bottom-sheet-editor {
+    padding: 20px 24px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.bottom-sheet-drag-handle {
+    width: 40px;
+    height: 5px;
+    background: var(--border-strong);
+    border-radius: 3px;
+    margin: -8px auto 12px auto;
+}
+
+/* Map Interactive Popup Card */
+.place-popup-card {
+    padding: 4px;
+    min-width: 180px;
+}
+
+.place-popup-card button {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+/* Custom WebGL User GPS Dot Pulse */
+.user-gps-dot {
+    position: relative;
+}
+
+.user-gps-dot::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.35);
+    animation: gps-pulse 2s infinite ease-out;
+}
+
+@keyframes gps-pulse {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}#zoom-controls {
 
     position: absolute;
 
