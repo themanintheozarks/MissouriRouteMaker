@@ -4,7 +4,8 @@ Missouri Route Maker
 
 places.js
 
-Permanent Places
+Module 4
+Place Editor Foundation
 
 ==========================================================
 */
@@ -14,7 +15,6 @@ import { getMap } from "./map/map.js";
 import {
 
     savePlace,
-
     loadPlaces
 
 } from "./database.js";
@@ -31,7 +31,7 @@ export async function initializePlaces() {
 
     if (!map) return;
 
-    map.on("click", addPlace);
+    map.on("click", openPlaceEditor);
 
     await restorePlaces();
 
@@ -47,25 +47,32 @@ async function restorePlaces() {
 
     const places = await loadPlaces();
 
-    places.forEach(place => {
-
-        drawPlace(place);
-
-    });
+    places.forEach(drawPlace);
 
 }
 
 /*
 ==========================================================
-Map Click
+Open Place Editor
+
+(Temporary)
+
+The browser prompt will be replaced by
+the permanent Bottom Sheet editor in
+the next build.
+
 ==========================================================
 */
 
-async function addPlace(event) {
+async function openPlaceEditor(event) {
 
-    const name = prompt("Enter place name");
+    const name = prompt("Place Name");
 
-    if (!name) return;
+    if (!name) {
+
+        return;
+
+    }
 
     const place = {
 
@@ -75,13 +82,13 @@ async function addPlace(event) {
 
         longitude: event.lngLat.lng,
 
-        status: "green",
-
-        rating: 0,
+        categories: [],
 
         notes: "",
 
-        categories: []
+        rating: 0,
+
+        status: "green"
 
     };
 
@@ -99,28 +106,69 @@ Draw Marker
 
 function drawPlace(place) {
 
-    new maplibregl.Marker({
+    const marker = new maplibregl.Marker({
 
         color: "#16a34a"
 
     })
 
-    .setLngLat([
+        .setLngLat([
 
-        place.longitude,
+            place.longitude,
 
-        place.latitude
+            place.latitude
 
-    ])
+        ])
 
-    .setPopup(
+        .setPopup(
 
-        new maplibregl.Popup()
+            new maplibregl.Popup({
 
-        .setText(place.name)
+                closeButton: true
 
-    )
+            })
 
-    .addTo(getMap());
+                .setHTML(
+
+                    `
+                    <strong>${place.name}</strong>
+                    <br><br>
+
+                    <button
+                        id="edit-place">
+
+                        Edit
+
+                    </button>
+
+                    <button
+                        id="delete-place">
+
+                        Delete
+
+                    </button>
+                    `
+                )
+
+        )
+
+        .addTo(getMap());
+
+    /*
+    ==============================================
+    Future:
+
+    Edit
+
+    Delete
+
+    Route
+
+    Navigate
+
+    ==============================================
+    */
+
+    return marker;
 
 }
