@@ -14,7 +14,7 @@ import { initializePlaces } from "./places/places.js";
 import { initializeRouteLayer, calculateRoute, saveCurrentRoute, resetCurrentRoute } from "./routes.js";
 import { processImportFile } from "./import.js";
 import { exportData } from "./export.js";
-import { getSetting, saveSetting } from "./database.js";
+import { getSetting, loadPlaces } from "./database.js";
 
 /*
 ==========================================================
@@ -23,6 +23,16 @@ Application Lifecycle Entry Point
 */
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // Register Service Worker for PWA / Offline capabilities
+    if ("serviceWorker" in navigator) {
+        try {
+            const reg = await navigator.serviceWorker.register("/sw.js");
+            console.log("Service Worker registered successfully:", reg.scope);
+        } catch (err) {
+            console.warn("Service Worker registration failed:", err);
+        }
+    }
+
     console.log("Initializing Missouri Route Maker...");
 
     try {
@@ -73,6 +83,13 @@ function wireUIEventListeners() {
         });
     }
 
+    // Places Log Search & Status Filter
+    const searchInput = document.getElementById("places-search-input");
+    const statusFilter = document.getElementById("places-filter-status");
+
+    if (searchInput) searchInput.addEventListener("input", renderPlacesList);
+    if (statusFilter) statusFilter.addEventListener("change", renderPlacesList);
+
     // Import File Handling Trigger
     const importFileInput = document.getElementById("import-file-input");
     const importConfirmBtn = document.getElementById("import-confirm-btn");
@@ -93,7 +110,7 @@ function wireUIEventListeners() {
                 });
 
                 alert(`Import Complete! Parsed ${result.totalParsed} places, added ${result.importedCount} new entries.`);
-                window.location.reload(); // Refresh to update rendering engine
+                window.location.reload();
             } catch (err) {
                 alert(`Import Failed: ${err.message}`);
             }
@@ -165,13 +182,17 @@ function wireDrawerToggles() {
 
         if (toggleBtn && panelEl) {
             toggleBtn.addEventListener("click", () => {
-                // Close other panels
                 panels.forEach(id => {
                     if (id !== panelId) {
                         document.getElementById(id)?.classList.remove("active");
                     }
                 });
                 panelEl.classList.toggle("active");
+
+                // Render places list dynamically when opening Places Drawer
+                if (panelId === "places-panel" && panelEl.classList.contains("active")) {
+                    renderPlacesList();
+                }
             });
         }
 
@@ -181,6 +202,36 @@ function wireDrawerToggles() {
             });
         }
     });
+}
+
+/**
+ * Renders the filtered/searched list inside the Places drawer
+ */
+export async function renderPlacesList() {
+    const container = document.getElementById("places-list-container");
+    const searchVal = document.getElementById("places-search-input")?.value.toLowerCase() || "";
+    const filterStatus = document.getElementById("places-filter-status")?.value || "all";
+
+    if (!container) return;
+
+    const places = await loadPlaces();
+    const filtered = places.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchVal) || (p.notes && p.notes.toLowerCase().includes(searchVal));
+        const matchesStatus = filterStatus === "all" || p.status === filterStatus;
+        return matchesSearch && matchesStatus;
+    });
+
+    container.innerHTML = filtered.map(p => `
+        <div style="padding: 12px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface);">
+            <div>
+                <strong style="color: var(--text-primary); font-size: 0.9rem;">${p.name}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                    ${p.status === 'blue' ? '🔵 Visited' : '🟢 Unvisited'} • ${'★'.repeat(p.rating || 0)}
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="window.map.flyTo({center:[${p.lng}, ${p.lat}], zoom:15})">Locate</button>
+        </div>
+    `).join('') || '<div style="padding: 16px; color: var(--text-muted); text-align: center;">No matching places found.</div>';
 }
 
 /**
