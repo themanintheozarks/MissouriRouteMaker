@@ -9,7 +9,6 @@ Caches app shell, styles, scripts, and map libraries.
 
 const CACHE_NAME = "mo-route-maker-v1";
 
-// Static assets to store in cache
 const PRECACHE_ASSETS = [
     "/",
     "/index.html",
@@ -34,7 +33,54 @@ const PRECACHE_ASSETS = [
     "https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"
 ];
 
-// Install Event: Pre-cache static assets
+self.addEventListener("install", (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            console.log("[Service Worker] Pre-caching core assets...");
+            return cache.addAll(PRECACHE_ASSETS);
+        }).then(() => self.skipWaiting())
+    );
+});
+
+self.addEventListener("activate", (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cache) => {
+                    if (cache !== CACHE_NAME) {
+                        console.log("[Service Worker] Clearing old cache:", cache);
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
+});
+
+self.addEventListener("fetch", (event) => {
+    if (event.request.method !== "GET") return;
+
+    event.respondWith(
+        caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            return fetch(event.request).then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+                return networkResponse;
+            });
+        }).catch(() => {
+            if (event.request.headers.get("accept")?.includes("text/html")) {
+                return caches.match("/index.html");
+            }
+        })
+    );
+});// Install Event: Pre-cache static assets
 self.addEventListener("install", (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
