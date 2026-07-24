@@ -12,6 +12,7 @@ Application Entry Point
 import { initializeMap } from "./map/map.js";
 import { initializeGPS } from "./gps.js";
 import { initializePlaces } from "./places.js";
+import { initializeDatabase } from "./database.js";
 
 /*
 ==========================================================
@@ -19,42 +20,25 @@ Initialize Application
 ==========================================================
 */
 
-function initializeApplication() {
+async function initializeApplication() {
 
     console.log("Missouri Route Maker Starting...");
 
     initializeMap();
 
-    /*
-    ======================================================
-    Wait until the map has finished loading before
-    attaching GPS and Places.
-    ======================================================
-    */
+    window.map.on("load", async () => {
 
-    const map = window.map || null;
+        await initializeDatabase();
 
-    if (map) {
+        initializeGPS();
 
-        map.on("load", () => {
+        await initializePlaces();
 
-            initializeGPS();
+        console.log("Application Ready");
 
-            initializePlaces();
-
-            console.log("Modules Initialized");
-
-        });
-
-    }
+    });
 
 }
-
-/*
-==========================================================
-Start
-==========================================================
-*/
 
 document.addEventListener(
     "DOMContentLoaded",
