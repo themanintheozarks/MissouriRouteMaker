@@ -14,6 +14,23 @@ let watchId = null;
 let userMarker = null;
 
 /**
+ * Initializes GPS module setup and event listeners
+ */
+export function initializeGPS() {
+    console.log("GPS Module Initialized.");
+    const gpsBtn = document.getElementById("btn-gps-toggle");
+    if (gpsBtn) {
+        gpsBtn.addEventListener("click", () => {
+            if (watchId === null) {
+                startGpsTracking();
+            } else {
+                stopGpsTracking();
+            }
+        });
+    }
+}
+
+/**
  * Starts live GPS tracking and updates map position
  */
 export function startGpsTracking() {
