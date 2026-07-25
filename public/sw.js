@@ -1,13 +1,10 @@
 /*
 ==========================================================
-Missouri Route Maker
-
-sw.js - Production Service Worker
-Caches app shell, styles, scripts, and map libraries.
+Missouri Route Maker - Production Service Worker
 ==========================================================
 */
 
-const CACHE_NAME = "mo-route-maker-v1";
+const CACHE_NAME = "mo-route-maker-v2";
 
 const PRECACHE_ASSETS = [
     "/",
@@ -33,64 +30,23 @@ const PRECACHE_ASSETS = [
     "https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"
 ];
 
+// Install Event: Safe Pre-caching
 self.addEventListener("install", (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log("[Service Worker] Pre-caching core assets...");
-            return cache.addAll(PRECACHE_ASSETS);
-        }).then(() => self.skipWaiting())
-    );
-});
-
-self.addEventListener("activate", (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        console.log("[Service Worker] Clearing old cache:", cache);
-                        return caches.delete(cache);
-                    }
-                })
+            return Promise.allSettled(
+                PRECACHE_ASSETS.map((url) =>
+                    cache.add(url).catch((err) => {
+                        console.warn(`[Service Worker] Failed to precache: ${url}`, err);
+                    })
+                )
             );
-        }).then(() => self.clients.claim())
-    );
-});
-
-self.addEventListener("fetch", (event) => {
-    if (event.request.method !== "GET") return;
-
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request).then((networkResponse) => {
-                if (networkResponse && networkResponse.status === 200) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
-                    });
-                }
-                return networkResponse;
-            });
-        }).catch(() => {
-            if (event.request.headers.get("accept")?.includes("text/html")) {
-                return caches.match("/index.html");
-            }
-        })
-    );
-});// Install Event: Pre-cache static assets
-self.addEventListener("install", (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log("[Service Worker] Pre-caching core assets...");
-            return cache.addAll(PRECACHE_ASSETS);
         }).then(() => self.skipWaiting())
     );
 });
 
-// Activate Event: Clean up old caches
+// Activate Event: Clear old caches
 self.addEventListener("activate", (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -108,7 +64,6 @@ self.addEventListener("activate", (event) => {
 
 // Fetch Event: Cache-First strategy with Network Fallback
 self.addEventListener("fetch", (event) => {
-    // Only handle GET requests
     if (event.request.method !== "GET") return;
 
     event.respondWith(
@@ -117,7 +72,6 @@ self.addEventListener("fetch", (event) => {
                 return cachedResponse;
             }
             return fetch(event.request).then((networkResponse) => {
-                // Cache external tile or font requests dynamically if successful
                 if (networkResponse && networkResponse.status === 200) {
                     const responseToCache = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -127,7 +81,6 @@ self.addEventListener("fetch", (event) => {
                 return networkResponse;
             });
         }).catch(() => {
-            // Fallback response when completely offline and resource isn't cached
             if (event.request.headers.get("accept")?.includes("text/html")) {
                 return caches.match("/index.html");
             }
