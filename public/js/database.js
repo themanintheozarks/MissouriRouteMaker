@@ -2,389 +2,178 @@
 ==========================================================
 Missouri Route Maker
 
-database.js
+js/database.js
 
 IndexedDB Storage Engine
 ==========================================================
 */
 
-const DB_NAME = "MissouriRouteMaker";
+const DB_NAME = "MissouriRouteMakerDB";
 const DB_VERSION = 1;
 
-// Object Stores
-const STORES = {
-    PLACES: "places",
-    ROUTES: "routes",
-    CATEGORIES: "categories",
-    SETTINGS: "settings"
-};
-
-// Default Settings
-export const DEFAULT_SETTINGS = {
-    mapStyle: "street",
-    themeMode: "auto",
-    followMe: false,
-    arrivalRadiusFeet: 200,
-    gpsPollRateMs: 3000,
-    arrivalChime: true,
-    arrivalPopup: true,
-    visiblePins: {
-        green: true,
-        blue: true,
-        orange: true,
-        red: true
-    }
-};
-
-let database = null;
-
-/*
-==========================================================
-Initialize Database
-==========================================================
-*/
-
-export function initializeDatabase() {
+/**
+ * Opens and initializes IndexedDB Object Stores
+ */
+function openDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-        request.onerror = () => reject(request.error);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
 
-        request.onsuccess = () => {
-            database = request.result;
-            console.log("Database Ready");
-            resolve();
+            if (!db.objectStoreNames.contains("places")) {
+                db.createObjectStore("places", { keyPath: "id" });
+            }
+
+            if (!db.objectStoreNames.contains("routes")) {
+                db.createObjectStore("routes", { keyPath: "id" });
+            }
+
+            if (!db.objectStoreNames.contains("settings")) {
+                db.createObjectStore("settings", { keyPath: "key" });
+            }
         };
 
-        request.onupgradeneeded = event => {
-            database = event.target.result;
+        request.onsuccess = (event) => {
+            resolve(event.target.result);
+        };
 
-            // Places Store
-            if (!database.objectStoreNames.contains(STORES.PLACES)) {
-                const placesStore = database.createObjectStore(
-                    STORES.PLACES,
-                    { keyPath: "id" }
-                );
-
-                placesStore.createIndex("name", "name", { unique: false });
-                placesStore.createIndex("status", "status", { unique: false });
-                placesStore.createIndex("rating", "rating", { unique: false });
-                placesStore.createIndex("dateAdded", "dateAdded", { unique: false });
-            }
-
-            // Routes Store
-            if (!database.objectStoreNames.contains(STORES.ROUTES)) {
-                const routesStore = database.createObjectStore(
-                    STORES.ROUTES,
-                    { keyPath: "id" }
-                );
-
-                routesStore.createIndex("name", "name", { unique: false });
-            }
-
-            // Categories Store
-            if (!database.objectStoreNames.contains(STORES.CATEGORIES)) {
-                database.createObjectStore(
-                    STORES.CATEGORIES,
-                    { keyPath: "id" }
-                );
-            }
-
-            // Settings Store
-            if (!database.objectStoreNames.contains(STORES.SETTINGS)) {
-                database.createObjectStore(
-                    STORES.SETTINGS,
-                    { keyPath: "key" }
-                );
-            }
+        request.onerror = (event) => {
+            reject(event.target.error);
         };
     });
 }
 
-/*
-==========================================================
-Places CRUD
-==========================================================
-*/
+/* ==========================================================
+ * PLACES STORE OPERATIONS
+ * ========================================================== */
 
-export function savePlace(place) {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.PLACES, "readwrite");
-        const store = transaction.objectStore(STORES.PLACES);
+export async function loadPlaces() {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("places", "readonly");
+            const store = tx.objectStore("places");
+            const request = store.getAll();
 
-        const record = {
-            id: place.id || crypto.randomUUID(),
-            name: place.name || "Unnamed Place",
-            lat: Number(place.lat),
-            lng: Number(place.lng),
-            address: place.address || "",
-            status: place.status || "green",
-            notes: place.notes || "",
-            rating: Number(place.rating) || 0,
-            categories: Array.isArray(place.categories) ? place.categories : [],
-            dateAdded: place.dateAdded || new Date().toISOString()
-        };
-
-        const request = store.put(record);
-
-        request.onsuccess = () => resolve(record);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-export function loadPlaces() {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.PLACES, "readonly");
-        const store = transaction.objectStore(STORES.PLACES);
-        const request = store.getAll();
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-export function deletePlace(id) {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.PLACES, "readwrite");
-        const store = transaction.objectStore(STORES.PLACES);
-        const request = store.delete(id);
-
-        request.onsuccess = () => resolve(true);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-export function clearAllPlaces() {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.PLACES, "readwrite");
-        const store = transaction.objectStore(STORES.PLACES);
-        const request = store.clear();
-
-        request.onsuccess = () => resolve(true);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-/*
-==========================================================
-Bulk Import Places (Performance Optimized for 20,000+ Items)
-==========================================================
-*/
-
-export function bulkImportPlaces(placesArray) {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.PLACES, "readwrite");
-        const store = transaction.objectStore(STORES.PLACES);
-
-        placesArray.forEach(place => {
-            const record = {
-                id: place.id || crypto.randomUUID(),
-                name: place.name || "Unnamed Place",
-                lat: Number(place.lat),
-                lng: Number(place.lng),
-                address: place.address || "",
-                status: place.status || "green",
-                notes: place.notes || "",
-                rating: Number(place.rating) || 0,
-                categories: Array.isArray(place.categories) ? place.categories : [],
-                dateAdded: place.dateAdded || new Date().toISOString()
-            };
-            store.put(record);
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
         });
-
-        transaction.oncomplete = () => resolve(true);
-        transaction.onerror = () => reject(transaction.error);
-    });
+    } catch (err) {
+        console.error("Error loading places from IndexedDB:", err);
+        return [];
+    }
 }
 
-/*
-==========================================================
-Routes CRUD
-==========================================================
-*/
+export async function savePlace(place) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("places", "readwrite");
+            const store = tx.objectStore("places");
+            const request = store.put(place);
 
-export function saveRoute(route) {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.ROUTES, "readwrite");
-        const store = transaction.objectStore(STORES.ROUTES);
-
-        const record = {
-            id: route.id || crypto.randomUUID(),
-            name: route.name || "New Route",
-            stops: route.stops || [],
-            distance: route.distance || 0,
-            eta: route.eta || 0,
-            mode: route.mode || "Fastest",
-            notes: route.notes || ""
-        };
-
-        const request = store.put(record);
-
-        request.onsuccess = () => resolve(record);
-        request.onerror = () => reject(request.error);
-    });
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error saving place to IndexedDB:", err);
+    }
 }
 
-export function loadRoutes() {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.ROUTES, "readonly");
-        const store = transaction.objectStore(STORES.ROUTES);
-        const request = store.getAll();
+export async function deletePlace(id) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("places", "readwrite");
+            const store = tx.objectStore("places");
+            const request = store.delete(id);
 
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error deleting place from IndexedDB:", err);
+    }
 }
 
-export function deleteRoute(id) {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.ROUTES, "readwrite");
-        const store = transaction.objectStore(STORES.ROUTES);
-        const request = store.delete(id);
+/* ==========================================================
+ * ROUTES STORE OPERATIONS
+ * ========================================================== */
 
-        request.onsuccess = () => resolve(true);
-        request.onerror = () => reject(request.error);
-    });
+export async function loadRoutes() {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("routes", "readonly");
+            const store = tx.objectStore("routes");
+            const request = store.getAll();
+
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error loading routes from IndexedDB:", err);
+        return [];
+    }
 }
 
-export function clearAllRoutes() {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.ROUTES, "readwrite");
-        const store = transaction.objectStore(STORES.ROUTES);
-        const request = store.clear();
+export async function saveRoute(route) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("routes", "readwrite");
+            const store = tx.objectStore("routes");
+            const request = store.put(route);
 
-        request.onsuccess = () => resolve(true);
-        request.onerror = () => reject(request.error);
-    });
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error saving route to IndexedDB:", err);
+    }
 }
 
-/*
-==========================================================
-Settings
-==========================================================
-*/
+/* ==========================================================
+ * SETTINGS STORE OPERATIONS
+ * ========================================================== */
 
-export function getSetting(key, defaultValue = null) {
-    return new Promise(resolve => {
-        if (!database) return resolve(defaultValue);
+export async function getSetting(key, defaultValue = null) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction("settings", "readonly");
+            const store = tx.objectStore("settings");
+            const request = store.get(key);
 
-        const transaction = database.transaction(STORES.SETTINGS, "readonly");
-        const store = transaction.objectStore(STORES.SETTINGS);
-        const request = store.get(key);
+            request.onsuccess = () => {
+                if (request.result && request.result.value !== undefined) {
+                    resolve(request.result.value);
+                } else {
+                    resolve(defaultValue);
+                }
+            };
 
-        request.onsuccess = () => {
-            resolve(request.result ? request.result.value : defaultValue);
-        };
-        request.onerror = () => resolve(defaultValue);
-    });
+            request.onerror = () => resolve(defaultValue);
+        });
+    } catch (err) {
+        console.error("Error fetching setting:", err);
+        return defaultValue;
+    }
 }
 
-export function saveSetting(key, value) {
-    return new Promise((resolve, reject) => {
-        const transaction = database.transaction(STORES.SETTINGS, "readwrite");
-        const store = transaction.objectStore(STORES.SETTINGS);
-        const request = store.put({ key, value });
+export async function saveSetting(key, value) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("settings", "readwrite");
+            const store = tx.objectStore("settings");
+            const request = store.put({ key, value });
 
-        request.onsuccess = () => resolve(true);
-        request.onerror = () => reject(request.error);
-    });
-}
-            database = request.result;
-
-            console.log("Database Ready");
-
-            resolve();
-
-        };
-
-        request.onupgradeneeded = event => {
-
-            database = event.target.result;
-
-            if (!database.objectStoreNames.contains(STORE)) {
-
-                const store =
-                    database.createObjectStore(
-                        STORE,
-                        {
-                            keyPath: "id",
-                            autoIncrement: true
-                        }
-                    );
-
-                store.createIndex(
-                    "name",
-                    "name"
-                );
-
-            }
-
-        };
-
-    });
-
-}
-
-/*
-==========================================================
-Save Place
-==========================================================
-*/
-
-export function savePlace(place) {
-
-    return new Promise((resolve, reject) => {
-
-        const transaction =
-            database.transaction(
-                STORE,
-                "readwrite"
-            );
-
-        const store =
-            transaction.objectStore(STORE);
-
-        const request =
-            store.add(place);
-
-        request.onsuccess = () => resolve();
-
-        request.onerror = () => reject(request.error);
-
-    });
-
-}
-
-/*
-==========================================================
-Load Places
-==========================================================
-*/
-
-export function loadPlaces() {
-
-    return new Promise((resolve, reject) => {
-
-        const transaction =
-            database.transaction(
-                STORE,
-                "readonly"
-            );
-
-        const store =
-            transaction.objectStore(STORE);
-
-        const request =
-            store.getAll();
-
-        request.onsuccess = () => {
-
-            resolve(request.result);
-
-        };
-
-        request.onerror = () => reject(request.error);
-
-    });
-
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error saving setting:", err);
+    }
 }
