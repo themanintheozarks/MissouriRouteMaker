@@ -14,49 +14,57 @@ let watchId = null;
 let userMarker = null;
 
 /**
- * Initializes GPS module setup and event listeners
+ * Initializes GPS module setup and event listeners matching index.html
  */
 export function initializeGPS() {
     console.log("GPS Module Initializing...");
 
-    // Catch clicks anywhere on the document if the target mentions 'gps'
-    document.addEventListener("click", (e) => {
-        const target = e.target.closest("#btn-gps-toggle, #btn-gps, .gps-container, [data-action='gps']");
-        if (target) {
-            e.preventDefault();
-            console.log("GPS Button Clicked!");
-            
-            if (watchId === null) {
-                startGpsTracking();
-            } else {
-                stopGpsTracking();
-            }
-        }
-    });
+    const gpsBtn = document.getElementById("btn-gps");
+    const statusEl = document.getElementById("gps-status");
 
-    console.log("Global GPS click listener successfully attached.");
+    if (!gpsBtn) {
+        console.warn("GPS button element (#btn-gps) not found in DOM.");
+        return;
+    }
+
+    const toggleGPS = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        if (watchId === null) {
+            startGpsTracking(statusEl, gpsBtn);
+        } else {
+            stopGpsTracking(statusEl, gpsBtn);
+        }
+    };
+
+    gpsBtn.addEventListener("click", toggleGPS);
+    gpsBtn.addEventListener("touchend", toggleGPS);
+
+    console.log("GPS button event listeners attached.");
 }
 
 /**
  * Starts live GPS tracking and updates map position
  */
-export function startGpsTracking() {
-    const statusEl = document.getElementById("gps-status");
-
+export function startGpsTracking(statusEl, gpsBtn) {
     if (!navigator.geolocation) {
-        if (statusEl) statusEl.textContent = "GPS Not Supported";
+        if (statusEl) statusEl.textContent = "GPS Unavail";
         alert("Geolocation is not supported by your browser.");
         return;
     }
 
-    if (statusEl) statusEl.textContent = "Connecting GPS...";
+    if (statusEl) statusEl.textContent = "Connecting...";
 
     watchId = navigator.geolocation.watchPosition(
         (position) => {
             const { latitude, longitude, accuracy } = position.coords;
-            console.log(`GPS Location: ${latitude}, ${longitude} (Accuracy: ${accuracy}m)`);
+            console.log(`GPS Position: ${latitude}, ${longitude} (Accuracy: ${accuracy}m)`);
 
-            if (statusEl) statusEl.textContent = `GPS Connected (${Math.round(accuracy)}m)`;
+            if (statusEl) statusEl.textContent = `GPS On (${Math.round(accuracy)}m)`;
+            if (gpsBtn) gpsBtn.classList.add("active");
 
             const map = getMapInstance();
             if (map) {
@@ -65,15 +73,18 @@ export function startGpsTracking() {
         },
         (error) => {
             console.error("GPS Error:", error);
-            if (statusEl) statusEl.textContent = "GPS Denied";
+            if (statusEl) statusEl.textContent = "GPS Off";
+            if (gpsBtn) gpsBtn.classList.remove("active");
 
             if (error.code === error.PERMISSION_DENIED) {
-                alert("Location permission was denied. Enable location in site permissions.");
+                alert("Location permission was denied. Please enable Location in your site settings.");
             } else if (error.code === error.POSITION_UNAVAILABLE) {
-                alert("Location unavailable. Make sure GPS is ON.");
+                alert("Location unavailable. Make sure location/GPS is toggled ON on your device.");
             } else {
                 alert("GPS Error: " + error.message);
             }
+            
+            stopGpsTracking(statusEl, gpsBtn);
         },
         {
             enableHighAccuracy: true,
@@ -86,7 +97,7 @@ export function startGpsTracking() {
 /**
  * Stops live GPS tracking
  */
-export function stopGpsTracking() {
+export function stopGpsTracking(statusEl, gpsBtn) {
     if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
@@ -97,8 +108,8 @@ export function stopGpsTracking() {
         userMarker = null;
     }
 
-    const statusEl = document.getElementById("gps-status");
-    if (statusEl) statusEl.textContent = "GPS Disconnected";
+    if (statusEl) statusEl.textContent = "GPS Off";
+    if (gpsBtn) gpsBtn.classList.remove("active");
 }
 
 /**
@@ -108,12 +119,6 @@ function updateUserMarker(map, lng, lat) {
     if (!userMarker) {
         const el = document.createElement("div");
         el.className = "user-location-marker";
-        el.style.width = "18px";
-        el.style.height = "18px";
-        el.style.backgroundColor = "#007aff";
-        el.style.borderRadius = "50%";
-        el.style.border = "3px solid #ffffff";
-        el.style.boxShadow = "0 0 10px rgba(0,122,255,0.6)";
 
         userMarker = new maplibregl.Marker({ element: el })
             .setLngLat([lng, lat])
