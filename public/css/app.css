@@ -4,7 +4,7 @@ Missouri Route Maker
 
 css/app.css
 
-Main Application Layout & Mobile Navigation Rules
+Main Application Layout & Responsive Navigation Controls
 ==========================================================
 */
 
@@ -16,8 +16,10 @@ Main Application Layout & Mobile Navigation Rules
 }
 
 html, body {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #0f172a;
@@ -35,8 +37,8 @@ html, body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
 }
 
@@ -73,6 +75,12 @@ html, body {
     align-items: center;
     gap: 4px;
     pointer-events: auto !important;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+}
+
+.nav-actions::-webkit-scrollbar {
+    display: none; /* Chrome / Safari / Brave */
 }
 
 /* Interactive Navigation Buttons */
@@ -93,20 +101,19 @@ html, body {
     transition: background 0.2s ease;
     user-select: none;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.nav-btn .label {
-    display: inline-block;
-}
-
-/* Compact rules for narrow mobile screens */
+/* Hide button text on narrow screens to fit all icons in a single row */
 @media (max-width: 480px) {
     .brand h1 {
         font-size: 0.75rem;
     }
+    .nav-btn .label {
+        display: none;
+    }
     .nav-btn {
-        padding: 5px 6px;
-        font-size: 0.7rem;
+        padding: 6px 10px;
     }
 }
 
@@ -114,9 +121,6 @@ html, body {
     background: rgba(14, 165, 233, 0.15);
     border-color: rgba(14, 165, 233, 0.4);
     color: #38bdf8;
-    max-width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .gps-container.active {
@@ -125,7 +129,7 @@ html, body {
     color: #4ade80;
 }
 
-/* Marker Styling */
+/* User Marker */
 .user-location-marker {
     width: 18px;
     height: 18px;
