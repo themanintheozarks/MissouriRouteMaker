@@ -4,7 +4,7 @@ Missouri Route Maker
 
 js/gps.js
 
-Module: GPS Geolocation & Location Tracking
+Module: GPS Geolocation & Continuous Follow Me Tracking
 ==========================================================
 */
 
@@ -14,7 +14,7 @@ let watchId = null;
 let userMarker = null;
 
 /**
- * Initializes GPS module setup and event listeners matching index.html
+ * Initializes GPS module setup and event listeners
  */
 export function initializeGPS() {
     console.log("GPS Module Initializing...");
@@ -77,7 +77,7 @@ export function startGpsTracking(statusEl, gpsBtn) {
             if (gpsBtn) gpsBtn.classList.remove("active");
 
             if (error.code === error.PERMISSION_DENIED) {
-                alert("Location permission was denied. Please enable Location in your site settings.");
+                alert("Location permission was denied. Please enable Location in site settings.");
             } else if (error.code === error.POSITION_UNAVAILABLE) {
                 alert("Location unavailable. Make sure location/GPS is toggled ON on your device.");
             } else {
@@ -113,19 +113,22 @@ export function stopGpsTracking(statusEl, gpsBtn) {
 }
 
 /**
- * Updates or creates the user's current location marker on the map
+ * Updates or creates the user's current location marker and follows movement
  */
 function updateUserMarker(map, lng, lat) {
     if (!userMarker) {
         const el = document.createElement("div");
         el.className = "user-location-marker";
 
-        userMarker = new maplibregl.Marker({ element: el })
+        userMarker = new window.maplibregl.Marker({ element: el })
             .setLngLat([lng, lat])
             .addTo(map);
 
-        map.flyTo({ center: [lng, lat], zoom: 14 });
+        // First fix: jump camera directly to user location
+        map.flyTo({ center: [lng, lat], zoom: 15 });
     } else {
         userMarker.setLngLat([lng, lat]);
+        // Continuous Follow Me: smoothly pan map as position moves
+        map.easeTo({ center: [lng, lat] });
     }
 }
