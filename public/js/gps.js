@@ -19,42 +19,22 @@ let userMarker = null;
 export function initializeGPS() {
     console.log("GPS Module Initializing...");
 
-    // Find any element related to GPS (button, container, or icon)
-    const gpsTargets = [
-        document.getElementById("btn-gps-toggle"),
-        document.getElementById("btn-gps"),
-        document.getElementById("gps-status"),
-        document.querySelector(".gps-container"),
-        document.querySelector("[data-action='gps']")
-    ].filter(Boolean); // Keep only elements that actually exist on the page
-
-    if (gpsTargets.length === 0) {
-        console.warn("GPS button element not found in HTML.");
-        return;
-    }
-
-    const toggleGPS = (e) => {
-        if (e) {
+    // Catch clicks anywhere on the document if the target mentions 'gps'
+    document.addEventListener("click", (e) => {
+        const target = e.target.closest("#btn-gps-toggle, #btn-gps, .gps-container, [data-action='gps']");
+        if (target) {
             e.preventDefault();
-            e.stopPropagation();
+            console.log("GPS Button Clicked!");
+            
+            if (watchId === null) {
+                startGpsTracking();
+            } else {
+                stopGpsTracking();
+            }
         }
-
-        console.log("GPS Toggle Triggered");
-        if (watchId === null) {
-            startGpsTracking();
-        } else {
-            stopGpsTracking();
-        }
-    };
-
-    // Attach click and touch events to all matched GPS elements
-    gpsTargets.forEach((target) => {
-        target.style.cursor = "pointer";
-        target.addEventListener("click", toggleGPS);
-        target.addEventListener("touchend", toggleGPS);
     });
 
-    console.log("GPS event listeners successfully attached.");
+    console.log("Global GPS click listener successfully attached.");
 }
 
 /**
@@ -71,7 +51,6 @@ export function startGpsTracking() {
 
     if (statusEl) statusEl.textContent = "Connecting GPS...";
 
-    // Force browser to prompt for GPS location
     watchId = navigator.geolocation.watchPosition(
         (position) => {
             const { latitude, longitude, accuracy } = position.coords;
@@ -89,9 +68,9 @@ export function startGpsTracking() {
             if (statusEl) statusEl.textContent = "GPS Denied";
 
             if (error.code === error.PERMISSION_DENIED) {
-                alert("Location permission was denied in your browser settings.");
+                alert("Location permission was denied. Enable location in site permissions.");
             } else if (error.code === error.POSITION_UNAVAILABLE) {
-                alert("Location unavailable. Make sure location/GPS is toggled ON in your device settings.");
+                alert("Location unavailable. Make sure GPS is ON.");
             } else {
                 alert("GPS Error: " + error.message);
             }
@@ -140,7 +119,6 @@ function updateUserMarker(map, lng, lat) {
             .setLngLat([lng, lat])
             .addTo(map);
 
-        // Center map on user location
         map.flyTo({ center: [lng, lat], zoom: 14 });
     } else {
         userMarker.setLngLat([lng, lat]);
