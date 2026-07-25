@@ -118,6 +118,23 @@ export async function loadRoutes() {
     }
 }
 
+export async function getRoute(id) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("routes", "readonly");
+            const store = tx.objectStore("routes");
+            const request = store.get(id);
+
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error fetching route:", err);
+        return null;
+    }
+}
+
 export async function saveRoute(route) {
     try {
         const db = await openDB();
@@ -131,6 +148,22 @@ export async function saveRoute(route) {
         });
     } catch (err) {
         console.error("Error saving route to IndexedDB:", err);
+    }
+}
+
+export async function deleteRoute(id) {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("routes", "readwrite");
+            const store = tx.objectStore("routes");
+            const request = store.delete(id);
+
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error("Error deleting route from IndexedDB:", err);
     }
 }
 
