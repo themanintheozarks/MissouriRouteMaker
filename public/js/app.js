@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         // 1. Initialize Core Map Instance
         const map = await initializeMap();
+        window.map = map; // Expose map globally for UI location actions
 
         // 2. Initialize Route Layer on Map
         initializeRouteLayer(map);
@@ -229,7 +230,7 @@ export async function renderPlacesList() {
                     ${p.status === 'blue' ? '🔵 Visited' : '🟢 Unvisited'} • ${'★'.repeat(p.rating || 0)}
                 </div>
             </div>
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="window.map.flyTo({center:[${p.lng}, ${p.lat}], zoom:15})">Locate</button>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="window.map && window.map.flyTo({center:[${p.lng}, ${p.lat}], zoom:15})">Locate</button>
         </div>
     `).join('') || '<div style="padding: 16px; color: var(--text-muted); text-align: center;">No matching places found.</div>';
 }
