@@ -14,19 +14,28 @@ let watchId = null;
 let userMarker = null;
 
 /**
- * Initializes GPS module setup and event listeners
+ * Initializes GPS module setup and event listeners for both Mouse & Touch
  */
 export function initializeGPS() {
     console.log("GPS Module Initialized.");
-    const gpsBtn = document.getElementById("btn-gps-toggle");
+
+    // Select either the button or the wrapper header container
+    const gpsBtn = document.getElementById("btn-gps-toggle") || document.querySelector(".gps-container");
+
     if (gpsBtn) {
-        gpsBtn.addEventListener("click", () => {
+        const handleGpsTrigger = (e) => {
+            if (e) e.preventDefault();
+
             if (watchId === null) {
                 startGpsTracking();
             } else {
                 stopGpsTracking();
             }
-        });
+        };
+
+        // Listen for both desktop clicks and mobile touch taps
+        gpsBtn.addEventListener("click", handleGpsTrigger);
+        gpsBtn.addEventListener("touchstart", handleGpsTrigger, { passive: false });
     }
 }
 
@@ -38,12 +47,13 @@ export function startGpsTracking() {
 
     if (!navigator.geolocation) {
         if (statusEl) statusEl.textContent = "GPS Not Supported";
-        console.error("Geolocation is not supported by this browser.");
+        alert("Geolocation is not supported by your browser.");
         return;
     }
 
     if (statusEl) statusEl.textContent = "Connecting GPS...";
 
+    // Request high-accuracy user location directly
     watchId = navigator.geolocation.watchPosition(
         (position) => {
             const { latitude, longitude, accuracy } = position.coords;
@@ -57,12 +67,20 @@ export function startGpsTracking() {
             }
         },
         (error) => {
-            console.error("GPS Error:", error.message);
-            if (statusEl) statusEl.textContent = "GPS Error";
+            console.error("GPS Error:", error);
+            if (statusEl) statusEl.textContent = "GPS Access Denied";
+
+            if (error.code === error.PERMISSION_DENIED) {
+                alert("Location permission was denied. Please allow Location access in your mobile browser site settings.");
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                alert("Location unavailable. Make sure your phone's GPS / Location toggle is enabled.");
+            } else {
+                alert("GPS Error: " + error.message);
+            }
         },
         {
             enableHighAccuracy: true,
-            timeout: 10000,
+            timeout: 15000,
             maximumAge: 0
         }
     );
@@ -93,16 +111,19 @@ function updateUserMarker(map, lng, lat) {
     if (!userMarker) {
         const el = document.createElement("div");
         el.className = "user-location-marker";
-        el.style.width = "16px";
-        el.style.height = "16px";
+        el.style.width = "18px";
+        el.style.height = "18px";
         el.style.backgroundColor = "#007aff";
         el.style.borderRadius = "50%";
         el.style.border = "3px solid #ffffff";
-        el.style.boxShadow = "0 0 10px rgba(0,122,255,0.5)";
+        el.style.boxShadow = "0 0 10px rgba(0,122,255,0.6)";
 
         userMarker = new maplibregl.Marker({ element: el })
             .setLngLat([lng, lat])
             .addTo(map);
+
+        // Center map on user location first time it connects
+        map.flyTo({ center: [lng, lat], zoom: 14 });
     } else {
         userMarker.setLngLat([lng, lat]);
     }
