@@ -3,8 +3,6 @@
 Missouri Route Maker
 
 js/map/map.js
-
-Module: MapLibre Instance & Tile Management
 ==========================================================
 */
 
@@ -16,12 +14,10 @@ const OSM_STYLE = {
         "osm-tiles": {
             type: "raster",
             tiles: [
-                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
             ],
             tileSize: 256,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '&copy; OpenStreetMap contributors'
         }
     },
     layers: [
@@ -35,22 +31,18 @@ const OSM_STYLE = {
     ]
 };
 
-/**
- * Initializes and mounts MapLibre GL JS onto the map container
- */
 export async function initializeMap() {
     console.log("Initializing Map Canvas...");
 
     return new Promise((resolve) => {
         try {
-            const container = document.getElementById("map");
-            if (!container) {
-                console.error("Map container element #map not found.");
+            if (typeof window.maplibregl === "undefined") {
+                console.error("MapLibre GL library not loaded!");
                 resolve(null);
                 return;
             }
 
-            mapInstance = new maplibregl.Map({
+            mapInstance = new window.maplibregl.Map({
                 container: "map",
                 style: OSM_STYLE,
                 center: [-92.5, 38.5], // Missouri center
@@ -58,29 +50,26 @@ export async function initializeMap() {
                 attributionControl: false
             });
 
-            mapInstance.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+            mapInstance.addControl(new window.maplibregl.AttributionControl({ compact: true }), "bottom-right");
 
             mapInstance.on("load", () => {
-                console.log("MapLibre canvas fully loaded.");
-                setTimeout(() => mapInstance.resize(), 100);
+                console.log("Map canvas loaded successfully.");
+                mapInstance.resize();
                 resolve(mapInstance);
             });
 
-            // Force initial resize trigger in case container dimensions settle post-load
+            // Force resize in case container dimensions finish rendering late
             setTimeout(() => {
                 if (mapInstance) mapInstance.resize();
-            }, 300);
+            }, 500);
 
         } catch (err) {
-            console.error("Failed to instantiate MapLibre:", err);
+            console.error("Failed to initialize map:", err);
             resolve(null);
         }
     });
 }
 
-/**
- * Returns global map instance
- */
 export function getMapInstance() {
     return mapInstance;
 }
