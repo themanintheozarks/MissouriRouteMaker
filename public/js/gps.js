@@ -14,29 +14,47 @@ let watchId = null;
 let userMarker = null;
 
 /**
- * Initializes GPS module setup and event listeners for both Mouse & Touch
+ * Initializes GPS module setup and event listeners
  */
 export function initializeGPS() {
-    console.log("GPS Module Initialized.");
+    console.log("GPS Module Initializing...");
 
-    // Select either the button or the wrapper header container
-    const gpsBtn = document.getElementById("btn-gps-toggle") || document.querySelector(".gps-container");
+    // Find any element related to GPS (button, container, or icon)
+    const gpsTargets = [
+        document.getElementById("btn-gps-toggle"),
+        document.getElementById("btn-gps"),
+        document.getElementById("gps-status"),
+        document.querySelector(".gps-container"),
+        document.querySelector("[data-action='gps']")
+    ].filter(Boolean); // Keep only elements that actually exist on the page
 
-    if (gpsBtn) {
-        const handleGpsTrigger = (e) => {
-            if (e) e.preventDefault();
-
-            if (watchId === null) {
-                startGpsTracking();
-            } else {
-                stopGpsTracking();
-            }
-        };
-
-        // Listen for both desktop clicks and mobile touch taps
-        gpsBtn.addEventListener("click", handleGpsTrigger);
-        gpsBtn.addEventListener("touchstart", handleGpsTrigger, { passive: false });
+    if (gpsTargets.length === 0) {
+        console.warn("GPS button element not found in HTML.");
+        return;
     }
+
+    const toggleGPS = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        console.log("GPS Toggle Triggered");
+        if (watchId === null) {
+            startGpsTracking();
+        } else {
+            stopGpsTracking();
+        }
+    };
+
+    // Attach click and touch events to all matched GPS elements
+    gpsTargets.forEach((target) => {
+        target.style.cursor = "pointer";
+        target.addEventListener("click", toggleGPS);
+        target.addEventListener("touchend", toggleGPS);
+    });
+
+    console.log("GPS event listeners successfully attached.");
 }
 
 /**
@@ -53,7 +71,7 @@ export function startGpsTracking() {
 
     if (statusEl) statusEl.textContent = "Connecting GPS...";
 
-    // Request high-accuracy user location directly
+    // Force browser to prompt for GPS location
     watchId = navigator.geolocation.watchPosition(
         (position) => {
             const { latitude, longitude, accuracy } = position.coords;
@@ -68,12 +86,12 @@ export function startGpsTracking() {
         },
         (error) => {
             console.error("GPS Error:", error);
-            if (statusEl) statusEl.textContent = "GPS Access Denied";
+            if (statusEl) statusEl.textContent = "GPS Denied";
 
             if (error.code === error.PERMISSION_DENIED) {
-                alert("Location permission was denied. Please allow Location access in your mobile browser site settings.");
+                alert("Location permission was denied in your browser settings.");
             } else if (error.code === error.POSITION_UNAVAILABLE) {
-                alert("Location unavailable. Make sure your phone's GPS / Location toggle is enabled.");
+                alert("Location unavailable. Make sure location/GPS is toggled ON in your device settings.");
             } else {
                 alert("GPS Error: " + error.message);
             }
@@ -122,7 +140,7 @@ function updateUserMarker(map, lng, lat) {
             .setLngLat([lng, lat])
             .addTo(map);
 
-        // Center map on user location first time it connects
+        // Center map on user location
         map.flyTo({ center: [lng, lat], zoom: 14 });
     } else {
         userMarker.setLngLat([lng, lat]);
