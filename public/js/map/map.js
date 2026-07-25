@@ -10,7 +10,6 @@ Module: MapLibre Instance & Tile Management
 
 let mapInstance = null;
 
-// OpenStreetMap Standard Raster Tile Configuration
 const OSM_STYLE = {
     version: 8,
     sources: {
@@ -42,31 +41,39 @@ const OSM_STYLE = {
 export async function initializeMap() {
     console.log("Initializing Map Canvas...");
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         try {
+            const container = document.getElementById("map");
+            if (!container) {
+                console.error("Map container element #map not found.");
+                resolve(null);
+                return;
+            }
+
             mapInstance = new maplibregl.Map({
                 container: "map",
                 style: OSM_STYLE,
-                center: [-92.5, 38.5], // Center on Missouri
+                center: [-92.5, 38.5], // Missouri center
                 zoom: 6.5,
                 attributionControl: false
             });
 
             mapInstance.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
-            mapInstance.addControl(new maplibregl.NavigationControl(), "top-right");
 
             mapInstance.on("load", () => {
                 console.log("MapLibre canvas fully loaded.");
-                mapInstance.resize();
+                setTimeout(() => mapInstance.resize(), 100);
                 resolve(mapInstance);
             });
 
-            mapInstance.on("error", (e) => {
-                console.error("MapLibre Error:", e);
-            });
+            // Force initial resize trigger in case container dimensions settle post-load
+            setTimeout(() => {
+                if (mapInstance) mapInstance.resize();
+            }, 300);
+
         } catch (err) {
             console.error("Failed to instantiate MapLibre:", err);
-            reject(err);
+            resolve(null);
         }
     });
 }
