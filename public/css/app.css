@@ -4,7 +4,7 @@ Missouri Route Maker
 
 css/app.css
 
-Main Application Layout & Responsive Header Overlays
+Main Application Layout & Mobile Navigation Rules
 ==========================================================
 */
 
@@ -55,16 +55,14 @@ html, body {
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
-    padding: 6px 10px;
+    padding: 6px 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     pointer-events: auto !important;
-    gap: 6px;
-    overflow-x: auto;
-    white-space: nowrap;
+    gap: 4px;
 }
 
 .brand h1 {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #ffffff;
     white-space: nowrap;
@@ -73,7 +71,7 @@ html, body {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     pointer-events: auto !important;
 }
 
@@ -81,13 +79,14 @@ html, body {
 .nav-btn {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 3px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #f8fafc;
-    padding: 6px 10px;
+    padding: 6px 8px;
     border-radius: 8px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer !important;
     pointer-events: auto !important;
@@ -96,14 +95,28 @@ html, body {
     white-space: nowrap;
 }
 
-.nav-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+.nav-btn .label {
+    display: inline-block;
+}
+
+/* Compact rules for narrow mobile screens */
+@media (max-width: 480px) {
+    .brand h1 {
+        font-size: 0.75rem;
+    }
+    .nav-btn {
+        padding: 5px 6px;
+        font-size: 0.7rem;
+    }
 }
 
 .gps-container {
     background: rgba(14, 165, 233, 0.15);
     border-color: rgba(14, 165, 233, 0.4);
     color: #38bdf8;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .gps-container.active {
