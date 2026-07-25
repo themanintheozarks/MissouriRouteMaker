@@ -1,14 +1,369 @@
+@@ -1,225 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Missouri Route Maker</title>
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+
+    <meta
+        name="description"
+        content="Offline-first Missouri route planning application">
+
+    <meta
+        name="theme-color"
+        content="#2563eb">
+
+    <link
+        rel="manifest"
+        href="manifest.json">
+
+    <!-- ======================================================
+         MapLibre GL JS
+         ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+
+    <!-- ======================================================
+         Application Styles
+         ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/reset.css">
+
+    <link
+        rel="stylesheet"
+        href="css/variables.css">
+
+    <link
+        rel="stylesheet"
+        href="css/layout.css">
+
+    <link
+        rel="stylesheet"
+        href="css/components.css">
+
+    <link
+        rel="stylesheet"
+        href="css/app.css">
+
     
     <!-- MapLibre GL CSS -->
     <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
-    
-    <!-- Master Stylesheet Importer -->
+    <!-- App Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
+<body>
+
+<div id="app">
+
+    <!-- ======================================================
+         Header
+         ====================================================== -->
+
+    <header id="app-header">
+
+        <h1 id="app-title">
+
+            Missouri Route Maker
+
+        </h1>
+
+        <button
+            id="menu-button"
+            aria-label="Menu">
+
+            ☰
+
+        </button>
+
+    </header>
+
+    <!-- ======================================================
+         Main Content
+         ====================================================== -->
+
+    <main id="main-content">
+
+        <div id="map-container">
+
+            <div id="map"></div>
+    <!-- Main Map Container -->
+    <div id="map"></div>
+
+    <!-- Top Floating Toolbar -->
+    <div class="top-bar">
+        <div class="brand">
+            <span class="brand-title">MO Route Maker</span>
+            <span id="gps-status" class="status-badge">Map Initializing...</span>
+        </div>
+
+        <div id="gps-status">
+
+            GPS Not Connected
+
+        <div class="top-actions">
+            <button id="gps-button" class="icon-btn" title="Toggle Follow Me GPS">🎯 GPS</button>
+            <button id="toggle-routes-panel" class="icon-btn" title="Route Builder">🗺️ Route</button>
+            <button id="toggle-places-panel" class="icon-btn" title="Places Log">📍 Places</button>
+            <button id="toggle-import-panel" class="icon-btn" title="Import Data">📥 Import</button>
+            <button id="toggle-settings-panel" class="icon-btn" title="Settings">⚙️</button>
+        </div>
+
+        <div id="popup-container"></div>
+
+        <div id="toast-container"></div>
+
+        <div
+            id="loading-overlay"
+            class="hidden">
+
+            <div id="loading-spinner"></div>
+
+            <p>Loading...</p>
+
+    </div>
+
+    <!-- Map Zoom Controls (Left floating) -->
+    <div class="zoom-controls">
+        <button id="zoom-in" class="zoom-btn">+</button>
+        <button id="zoom-out" class="zoom-btn">−</div>
+    </div>
+
+    <!-- Drawer: Route Builder Panel -->
+    <div id="routes-panel" class="drawer-panel">
+        <div class="drawer-header">
+            <h3>Route Builder</h3>
+            <button id="close-routes-panel" class="close-btn">&times;</button>
+        </div>
+
+        <!-- Floating Buttons -->
+
+        <button
+            id="gps-button"
+            class="floating-button">
+
+            📍
+
+        </button>
+
+        <button
+            id="route-button"
+            class="floating-button">
+
+            🚗
+
+        </button>
+
+        <!-- Zoom Controls -->
+
+        <div id="zoom-controls">
+
+            <button id="zoom-in">
+
+                +
+
+            </button>
+
+            <button id="zoom-out">
+
+                −
+
+            </button>
+
+        <div class="drawer-body">
+            <div class="form-group">
+                <label for="route-mode-select">Optimization Mode</label>
+                <select id="route-mode-select">
+                    <option value="Fastest">Fastest Time</option>
+                    <option value="Shortest">Shortest Distance</option>
+                    <option value="Avoid Highways">Avoid Highways</option>
+                    <option value="Scenic">Scenic Route</option>
+                    <option value="Round Trip">Round Trip</option>
+                </select>
+            </div>
+            <div id="route-info-display" class="info-card">
+                No route calculated yet. Add stops by clicking pins.
+            </div>
+            <div class="action-row">
+                <button id="calc-route-btn" class="btn btn-primary">Calculate Route</button>
+                <button id="save-route-btn" class="btn btn-success">Save Route</button>
+                <button id="clear-route-btn" class="btn btn-danger">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    </main>
+
+    <!-- ======================================================
+         Bottom Navigation
+         ====================================================== -->
+
+    <nav id="bottom-navigation">
+
+        <button id="nav-map">
+
+            🗺️
+
+            <span>Map</span>
+
+        </button>
+
+        <button id="nav-places">
+
+            📍
+
+            <span>Places</span>
+
+        </button>
+
+        <button id="nav-routes">
+
+            🚗
+
+            <span>Routes</span>
+
+        </button>
+
+        <button id="nav-settings">
+
+            ⚙️
+
+            <span>Settings</span>
+
+        </button>
+
+    </nav>
+    <!-- Drawer: Places Log & Search -->
+    <div id="places-panel" class="drawer-panel">
+        <div class="drawer-header">
+            <h3>Saved Places</h3>
+            <button id="close-places-panel" class="close-btn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <input type="text" id="places-search-input" placeholder="Search places..." class="form-input">
+            <div class="filter-row">
+                <select id="places-filter-status" class="form-select">
+                    <option value="all">All Statuses</option>
+                    <option value="green">Unvisited (Green)</option>
+                    <option value="blue">Visited (Blue)</option>
+                </select>
+            </div>
+            <div id="places-list-container" class="list-container">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================
+         Bottom Sheet
+         ====================================================== -->
+    <!-- Drawer: Import Data Panel -->
+    <div id="import-panel" class="drawer-panel">
+        <div class="drawer-header">
+            <h3>Import Places</h3>
+            <button id="close-import-panel" class="close-btn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="help-text">Supports Google Takeout (JSON), CSV, GPX, and KML.</p>
+            <div class="form-group">
+                <input type="file" id="import-file-input" accept=".json,.csv,.gpx,.kml">
+            </div>
+            <div class="form-group">
+                <label>Duplicate Strategy:</label>
+                <div>
+                    <label><input type="radio" name="import-option" value="add_new" checked> Skip Existing</label>
+                    <label><input type="radio" name="import-option" value="replace_all"> Replace All</label>
+                </div>
+            </div>
+            <div id="import-progress-status" class="status-text">Ready for file...</div>
+            <button id="import-confirm-btn" class="btn btn-primary full-width">Start Import</button>
+        </div>
+    </div>
+
+    <section id="bottom-sheet">
+    <!-- Drawer: Settings & Export Panel -->
+    <div id="settings-panel" class="drawer-panel">
+        <div class="drawer-header">
+            <h3>Settings & Export</h3>
+            <button id="close-settings-panel" class="close-btn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <h4>Map Settings</h4>
+            <div class="form-group">
+                <label for="map-style-select">Map Tile Style</label>
+                <select id="map-style-select">
+                    <option value="street">Street Map</option>
+                    <option value="satellite">Satellite View</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="theme-select">Theme Mode</label>
+                <select id="theme-select">
+                    <option value="auto">Auto (Day/Night)</option>
+                    <option value="day">Day Mode</option>
+                    <option value="night">Night Mode</option>
+                </select>
+            </div>
+
+            <hr class="divider">
+
+            <h4>Export Data</h4>
+            <div class="form-group">
+                <label for="export-format-select">Format</label>
+                <select id="export-format-select">
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="gpx">GPX</option>
+                    <option value="kml">KML</option>
+                </select>
+            </div>
+            <div class="action-row">
+                <button id="export-places-btn" class="btn btn-secondary">Export Places</button>
+                <button id="export-routes-btn" class="btn btn-secondary">Export Routes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet Container (Place Editor Overlay) -->
+    <div id="bottom-sheet" class="bottom-sheet hidden">
+        <div id="bottom-sheet-content"></div>
+    </div>
+
+    </section>
+
+</div>
+
+<!-- ==========================================================
+     MapLibre
+     ========================================================== -->
+
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+
+<!-- ==========================================================
+     Application
+     ========================================================== -->
+
+<script
+    type="module"
+    src="js/app.js">
+</script>
+
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <!-- App Entry Point Module -->
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
