@@ -81,6 +81,30 @@ export async function savePlace(place) {
     }
 }
 
+export async function bulkImportPlaces(placesArray, mode = "add_new") {
+    try {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("places", "readwrite");
+            const store = tx.objectStore("places");
+
+            if (mode === "replace_all") {
+                store.clear();
+            }
+
+            placesArray.forEach((place) => {
+                store.put(place);
+            });
+
+            tx.oncomplete = () => resolve(placesArray.length);
+            tx.onerror = (event) => reject(event.target.error);
+        });
+    } catch (err) {
+        console.error("Error during bulk import of places:", err);
+        throw err;
+    }
+}
+
 export async function deletePlace(id) {
     try {
         const db = await openDB();
