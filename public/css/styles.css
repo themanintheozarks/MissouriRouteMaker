@@ -18,3 +18,19 @@ Missouri Route Maker - Master Stylesheet
 
 /* 5. Application Specific Overrides & State Classes */
 @import url('./app.css');
+
+/* Ensure top controls sit above map overlays and can receive clicks */
+header, 
+.top-nav, 
+.gps-container, 
+#btn-gps, 
+#btn-gps-toggle {
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Ensure canvas container doesn't trap clicks destined for top UI */
+#map {
+    z-index: 1;
+}
