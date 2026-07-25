@@ -14,7 +14,7 @@ let mapInstance = null;
 
 const MAP_STYLES = {
     street: "https://demotiles.maplibre.org/style.json",
-    satellite: "https://demotiles.maplibre.org/style.json" // Replace with satellite tile URL if available
+    satellite: "https://demotiles.maplibre.org/style.json"
 };
 
 /**
@@ -50,6 +50,13 @@ export async function initializeMap() {
  * Returns the global map instance
  */
 export function getMapInstance() {
+    return mapInstance;
+}
+
+/**
+ * Alias export for getMap compatibility
+ */
+export function getMap() {
     return mapInstance;
 }
 
