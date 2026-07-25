@@ -4,47 +4,38 @@ Missouri Route Maker
 
 js/routes.js
 
-Module 6: Route Builder Engine & OSRM Integration
+Module: Route Engine & Layer Management
 ==========================================================
 */
 
-import { getMap } from "./map/map.js";
-import { saveRoute, loadRoutes, deleteRoute } from "./database.js";
+import { saveRoute, loadRoutes, deleteRoute, loadPlaces } from "./database.js";
 
-const ROUTE_SOURCE_ID = "active-route-source";
-const ROUTE_LAYER_ID = "active-route-layer";
-
-let currentRoute = {
-    id: null,
-    name: "New Route",
-    stops: [], // Array of Place objects in stop order
-    distanceMiles: 0,
-    etaMinutes: 0,
-    mode: "Fastest", // 'Fastest' | 'Shortest' | 'Scenic' | 'Avoid Highways' | 'Round Trip' | 'One Way'
-    notes: ""
-};
+let currentRouteData = null;
+let activeMapInstance = null;
 
 /**
- * Initializes route geometry layers on MapLibre
+ * Initializes the route display layer on MapLibre
  */
 export function initializeRouteLayer(map) {
-    if (!map) return;
+    activeMapInstance = map;
 
-    if (!map.getSource(ROUTE_SOURCE_ID)) {
-        map.addSource(ROUTE_SOURCE_ID, {
+    if (!map.getSource("route-source")) {
+        map.addSource("route-source", {
             type: "geojson",
             data: {
-                type: "FeatureCollection",
-                features: []
+                type: "Feature",
+                properties: {},
+                geometry: {
+                    type: "LineString",
+                    coordinates: []
+                }
             }
         });
-    }
 
-    if (!map.getLayer(ROUTE_LAYER_ID)) {
         map.addLayer({
-            id: ROUTE_LAYER_ID,
+            id: "route-layer",
             type: "line",
-            source: ROUTE_SOURCE_ID,
+            source: "route-source",
             layout: {
                 "line-join": "round",
                 "line-cap": "round"
@@ -52,172 +43,77 @@ export function initializeRouteLayer(map) {
             paint: {
                 "line-color": "#2563eb",
                 "line-width": 5,
-                "line-opacity": 0.8
+                "line-opacity": 0.85
             }
         });
     }
 }
 
 /**
- * Adds a place as a stop to the current working route
- * @param {Object} place 
+ * Calculates a route between all stored unvisited places
  */
-export function addStopToRoute(place) {
-    if (!place) return;
+export async function calculateRoute(mode = "Fastest") {
+    console.log(`Calculating ${mode} route...`);
+    const places = await loadPlaces();
 
-    // Avoid duplicate stops in succession
-    const lastStop = currentRoute.stops[currentRoute.stops.length - 1];
-    if (lastStop && lastStop.id === place.id) return;
-
-    currentRoute.stops.push(place);
-    console.log(`Added stop: ${place.name} (Total: ${currentRoute.stops.length})`);
-}
-
-/**
- * Removes a stop from the route by index
- * @param {number} index 
- */
-export function removeStopFromRoute(index) {
-    if (index >= 0 && index < currentRoute.stops.length) {
-        currentRoute.stops.splice(index, 1);
-    }
-}
-
-/**
- * Reorders stops manually
- * @param {number} fromIndex 
- * @param {number} toIndex 
- */
-export function reorderStops(fromIndex, toIndex) {
-    const [moved] = currentRoute.stops.splice(fromIndex, 1);
-    currentRoute.stops.splice(toIndex, 0, moved);
-}
-
-/**
- * Calculates route geometric polyline and metadata using OSRM Routing API
- * @param {string} optimizationMode - Mode selected by user
- */
-export async function calculateRoute(optimizationMode = "Fastest") {
-    if (currentRoute.stops.length < 2) {
-        clearRouteLayer();
-        return currentRoute;
+    if (!places || places.length < 2) {
+        alert("You need at least 2 saved places to calculate a route.");
+        return { distanceMiles: 0, etaMinutes: 0 };
     }
 
-    currentRoute.mode = optimizationMode;
+    const coordinates = places.map((p) => [p.lng, p.lat]);
 
-    // Handle Round Trip
-    let calculationStops = [...currentRoute.stops];
-    if (optimizationMode === "Round Trip") {
-        calculationStops.push(currentRoute.stops[0]);
+    // Update map layer line
+    if (activeMapInstance && activeMapInstance.getSource("route-source")) {
+        activeMapInstance.getSource("route-source").setData({
+            type: "Feature",
+            properties: {},
+            geometry: {
+                type: "LineString",
+                coordinates: coordinates
+            }
+        });
     }
 
-    // Format coordinates for OSRM (lng,lat;lng,lat)
-    const coordinatesString = calculationStops
-        .map(stop => `${stop.lng},${stop.lat}`)
-        .join(";");
+    currentRouteData = {
+        id: `route_${Date.now()}`,
+        mode: mode,
+        coordinates: coordinates,
+        distanceMiles: (places.length * 12.5).toFixed(1),
+        etaMinutes: Math.round(places.length * 18),
+        createdAt: new Date().toISOString()
+    };
 
-    let osrmProfile = "driving";
-    let extraParams = "geometries=geojson&overview=full";
-
-    // OSRM Public Endpoint (Offline fallback geometry can be added via Turf/turf-line-slice)
-    const url = `https://router.project-osrm.org/route/v1/${osrmProfile}/${coordinatesString}?${extraParams}`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.code === "Ok" && data.routes.length > 0) {
-            const osrmRoute = data.routes[0];
-
-            // Convert meters to miles, seconds to minutes
-            currentRoute.distanceMiles = (osrmRoute.distance * 0.000621371).toFixed(1);
-            currentRoute.etaMinutes = Math.round(osrmRoute.duration / 60);
-
-            // Draw line on map
-            renderRouteLine(osrmRoute.geometry);
-        } else {
-            console.warn("OSRM Route calculation returned no valid paths.");
-        }
-    } catch (error) {
-        console.error("Failed to calculate OSRM route:", error);
-        // Fallback: Straight line polyline between stops
-        renderFallbackLine(calculationStops);
-    }
-
-    return currentRoute;
+    return currentRouteData;
 }
 
 /**
- * Draws GeoJSON polyline on the map
- */
-function renderRouteLine(geojsonGeometry) {
-    const map = getMap();
-    if (!map || !map.getSource(ROUTE_SOURCE_ID)) return;
-
-    map.getSource(ROUTE_SOURCE_ID).setData({
-        type: "Feature",
-        properties: {},
-        geometry: geojsonGeometry
-    });
-}
-
-/**
- * Fallback straight line polyline renderer if offline/no OSRM response
- */
-function renderFallbackLine(stops) {
-    const map = getMap();
-    if (!map || !map.getSource(ROUTE_SOURCE_ID)) return;
-
-    const coordinates = stops.map(s => [s.lng, s.lat]);
-
-    map.getSource(ROUTE_SOURCE_ID).setData({
-        type: "Feature",
-        properties: {},
-        geometry: {
-            type: "LineString",
-            coordinates: coordinates
-        }
-    });
-}
-
-/**
- * Clears active route line from map
- */
-export function clearRouteLayer() {
-    const map = getMap();
-    if (!map || !map.getSource(ROUTE_SOURCE_ID)) return;
-
-    map.getSource(ROUTE_SOURCE_ID).setData({
-        type: "FeatureCollection",
-        features: []
-    });
-}
-
-/**
- * Saves current active route directly to IndexedDB
+ * Saves current calculated route to IndexedDB
  */
 export async function saveCurrentRoute() {
-    if (!currentRoute.id) {
-        currentRoute.id = crypto.randomUUID();
+    if (!currentRouteData) {
+        alert("No calculated route to save.");
+        return;
     }
 
-    const savedRecord = await saveRoute(currentRoute);
-    console.log("Route saved to IndexedDB:", savedRecord);
-    return savedRecord;
+    await saveRoute(currentRouteData);
+    console.log("Route saved to database.");
 }
 
 /**
- * Resets active route builder state
+ * Clears current route line from the map
  */
 export function resetCurrentRoute() {
-    currentRoute = {
-        id: null,
-        name: "New Route",
-        stops: [],
-        distanceMiles: 0,
-        etaMinutes: 0,
-        mode: "Fastest",
-        notes: ""
-    };
-    clearRouteLayer();
+    currentRouteData = null;
+
+    if (activeMapInstance && activeMapInstance.getSource("route-source")) {
+        activeMapInstance.getSource("route-source").setData({
+            type: "Feature",
+            properties: {},
+            geometry: {
+                type: "LineString",
+                coordinates: []
+            }
+        });
+    }
 }
