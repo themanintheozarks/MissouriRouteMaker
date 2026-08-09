@@ -1,87 +1,90 @@
-/*
-==========================================================
-Missouri Route Maker
+import { initDB } from './db.js';
+import { initMap, addMarkerToMap, clearMarkers, setMapTheme, toggleLayer } from './map.js';
+import { initGPS, startTracking, stopTracking } from './gps.js';
+import { renderPlacesList, renderCategories, openEditorModal } from './editor.js';
+import { initArrivalDetector } from './arrival.js';
+import { handleTakeoutImport, handleGPXImport } from './import.js';
+import { exportToGPX, exportToJSON } from './export.js';
 
-js/app.js
+let places = [];
+let routes = [];
 
-Main Application Entry Point & Module Orchestrator
-==========================================================
-*/
-
-import { initializeMap, enableMapClickPinCreation } from "./map/map.js";
-import { initializeGPS } from "./gps.js";
-import { initDatabase } from "./database.js";
-
-document.addEventListener("DOMContentLoaded", async () => {
-    console.log("Starting Missouri Route Maker Startup Sequence...");
-
-    // 1. Initialize Local Storage Engine
+document.addEventListener('DOMContentLoaded', async () => {
     try {
-        await initDatabase();
-    } catch (dbErr) {
-        console.error("Database connection failed:", dbErr);
-    }
-
-    // 2. Initialize GPS & Control Handlers
-    try {
-        initializeGPS();
-        attachDrawerListeners();
-    } catch (gpsErr) {
-        console.error("GPS startup error:", gpsErr);
-    }
-
-    // 3. Initialize Map Canvas & Interactive Long-Press Pin Creation
-    try {
-        const map = await initializeMap();
-        if (map) {
-            enableMapClickPinCreation(map);
-        }
-    } catch (mapErr) {
-        console.error("Map startup error:", mapErr);
+        await initDB();
+        await initMap('map-container');
+        await initGPS();
+        initArrivalDetector();
+        
+        await reloadData();
+        setupEventListeners();
+        console.log("App initialized successfully.");
+    } catch (err) {
+        console.error("Initialization error:", err);
     }
 });
 
-/**
- * Handles slide-out modal drawers for main navigation controls
- */
-function attachDrawerListeners() {
-    const overlay = document.getElementById("modal-overlay");
-    const closeBtn = document.getElementById("modal-close-btn");
-    const titleEl = document.getElementById("modal-title");
-    const bodyEl = document.getElementById("modal-body");
+async function reloadData() {
+    // Refresh UI lists and map pins from DB state
+    await renderPlacesList();
+    await renderCategories();
+}
 
-    const openModal = (title, contentHtml) => {
-        if (!overlay) return;
-        titleEl.textContent = title;
-        bodyEl.innerHTML = contentHtml;
-        overlay.classList.remove("overlay-hidden");
-    };
+function setupEventListeners() {
+    // Add Place Button
+    const addPlaceBtn = document.getElementById('btn-add-place');
+    if (addPlaceBtn) {
+        addPlaceBtn.addEventListener('click', () => openEditorModal());
+    }
 
-    const closeModal = () => {
-        if (overlay) overlay.classList.add("overlay-hidden");
-    };
-
-    if (closeBtn) closeBtn.addEventListener("click", closeModal);
-    if (overlay) {
-        overlay.addEventListener("click", (e) => {
-            if (e.target === overlay) closeModal();
+    // Toggle GPS Tracking
+    const gpsToggleBtn = document.getElementById('btn-toggle-gps');
+    if (gpsToggleBtn) {
+        let tracking = false;
+        gpsToggleBtn.addEventListener('click', () => {
+            tracking = !tracking;
+            if (tracking) {
+                startTracking();
+                gpsToggleBtn.classList.add('active');
+            } else {
+                stopTracking();
+                gpsToggleBtn.classList.remove('active');
+            }
         });
     }
 
-    // Navigation Triggers
-    document.getElementById("btn-route")?.addEventListener("click", () => {
-        openModal("Route Builder", "<p>Route optimization module coming in Module 6.</p>");
-    });
+    // Import Handler
+    const importInput = document.getElementById('file-import-input');
+    if (importInput) {
+        importInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    document.getElementById("btn-places")?.addEventListener("click", () => {
-        openModal("Places Log", "<p>Places list and filter engine coming in Module 5.</p>");
-    });
+            if (file.name.endsWith('.json')) {
+                await handleTakeoutImport(file);
+            } else if (file.name.endsWith('.gpx')) {
+                await handleGPXImport(file);
+            }
+            await reloadData();
+        });
+    }
 
-    document.getElementById("btn-import")?.addEventListener("click", () => {
-        openModal("Import Data", "<p>Takeout/CSV/GPX/KML import engine coming in Module 4.</p>");
-    });
+    // Export Handlers
+    const exportGpxBtn = document.getElementById('btn-export-gpx');
+    if (exportGpxBtn) {
+        exportGpxBtn.addEventListener('click', () => exportToGPX());
+    }
 
-    document.getElementById("btn-settings")?.addEventListener("click", () => {
-        openModal("Settings", "<p>Map preferences and configuration coming in Settings.</p>");
-    });
+    const exportJsonBtn = document.getElementById('btn-export-json');
+    if (exportJsonBtn) {
+        exportJsonBtn.addEventListener('click', () => exportToJSON());
+    }
+
+    // Theme Switcher
+    const themeSelect = document.getElementById('select-theme');
+    if (themeSelect) {
+        themeSelect.addEventListener('change', (e) => {
+            setMapTheme(e.target.value);
+        });
+    }
 }
