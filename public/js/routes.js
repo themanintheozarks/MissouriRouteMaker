@@ -1,39 +1,3 @@
-/*
-==========================================================
-Missouri Route Maker
-
-js/routes.js
-
-Module: Route Engine & Layer Management
-==========================================================
-*/
-
-import { saveRoute, loadRoutes, deleteRoute, loadPlaces } from "./database.js";
-
-let currentRouteData = null;
-let activeMapInstance = null;
-
-/**
- * Initializes the route display layer on MapLibre
- */
-export function initializeRouteLayer(map) {
-    activeMapInstance = map;
-
-    if (!map.getSource("route-source")) {
-        map.addSource("route-source", {
-            type: "geojson",
-            data: {
-                type: "Feature",
-                properties: {},
-                geometry: {
-                    type: "LineString",
-                    coordinates: []
-                }
-            }
-        });
-
-        map.addLayer({
-            id: "route-layer",
             type: "line",
             source: "route-source",
             layout: {
