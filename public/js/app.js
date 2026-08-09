@@ -1,39 +1,3 @@
-import { initDB } from './db.js';
-import { initMap, addMarkerToMap, clearMarkers, setMapTheme, toggleLayer } from './map.js';
-import { initGPS, startTracking, stopTracking } from './gps.js';
-import { renderPlacesList, renderCategories, openEditorModal } from './editor.js';
-import { initArrivalDetector } from './arrival.js';
-import { handleTakeoutImport, handleGPXImport } from './import.js';
-import { exportToGPX, exportToJSON } from './export.js';
-
-let places = [];
-let routes = [];
-
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        await initDB();
-        await initMap('map-container');
-        await initGPS();
-        initArrivalDetector();
-        
-        await reloadData();
-        setupEventListeners();
-        console.log("App initialized successfully.");
-    } catch (err) {
-        console.error("Initialization error:", err);
-    }
-});
-
-async function reloadData() {
-    // Refresh UI lists and map pins from DB state
-    await renderPlacesList();
-    await renderCategories();
-}
-
-function setupEventListeners() {
-    // Add Place Button
-    const addPlaceBtn = document.getElementById('btn-add-place');
-    if (addPlaceBtn) {
         addPlaceBtn.addEventListener('click', () => openEditorModal());
     }
 
