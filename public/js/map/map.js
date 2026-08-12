@@ -1,39 +1,21 @@
-    return new Promise((resolve) => {
-        try {
-            if (typeof window.maplibregl === "undefined") {
-                console.error("MapLibre GL library not loaded!");
-                resolve(null);
-                return;
-            }
+// public/js/map/map.js
+export const mapManager = {
+    map: null,
 
-            mapInstance = new window.maplibregl.Map({
-                container: "map",
-                style: OSM_STYLE,
-                center: [-92.5, 38.5], // Missouri center
-                zoom: 6.5,
-                attributionControl: false
-            });
+    async init(containerId) {
+        if (this.map) return;
 
-            mapInstance.addControl(new window.maplibregl.AttributionControl({ compact: true }), "bottom-right");
+        this.map = new maplibregl.Map({
+            container: containerId,
+            style: 'https://demotiles.maplibre.org/style.json', // Reliable open tile style
+            center: [-92.26, 37.13], // Missouri center coordinates
+            zoom: 7
+        });
 
-            mapInstance.on("load", () => {
-                console.log("Map canvas loaded successfully.");
-                mapInstance.resize();
-                resolve(mapInstance);
-            });
-
-            // Force resize in case container dimensions finish rendering late
-            setTimeout(() => {
-                if (mapInstance) mapInstance.resize();
-            }, 500);
-
-        } catch (err) {
-            console.error("Failed to initialize map:", err);
-            resolve(null);
-        }
-    });
-}
-
-export function getMapInstance() {
-    return mapInstance;
-}
+        // Step 3: Force map engine to recalculate size on load
+        this.map.on('load', () => {
+            this.map.resize();
+            console.log("Map tiles loaded and rendered successfully.");
+        });
+    }
+};
