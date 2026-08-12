@@ -34,12 +34,3 @@ export function renderPlaceMarkers(map, places = []) {
                 openPlaceEditor(place);
             }
         });
-
-        currentMarkers.push(marker);
-    });
-}
-
-export function refreshPlaceMarkers(map, places) {
-    clearPlaceMarkers();
-    renderPlaceMarkers(map, places);
-}
