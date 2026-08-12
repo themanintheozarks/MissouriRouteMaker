@@ -5,7 +5,6 @@ Missouri Route Maker
 css/app.css
 
 Main Application Layout & Responsive Navigation Controls
-==========================================================
 */
 
 * {
@@ -15,7 +14,8 @@ Main Application Layout & Responsive Navigation Controls
     -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
+html,
+body {
     width: 100vw;
     height: 100vh;
     margin: 0;
@@ -76,11 +76,13 @@ html, body {
     gap: 4px;
     pointer-events: auto !important;
     overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .nav-actions::-webkit-scrollbar {
-    display: none; /* Chrome / Safari / Brave */
+    display: none;
+    /* Chrome / Safari / Brave */
 }
 
 /* Interactive Navigation Buttons */
@@ -109,9 +111,11 @@ html, body {
     .brand h1 {
         font-size: 0.75rem;
     }
+
     .nav-btn .label {
         display: none;
     }
+
     .nav-btn {
         padding: 6px 10px;
     }
