@@ -1,5 +1,3 @@
-import { openPlaceEditor } from './editor.js';
-
 let currentMarkers = [];
 
 export function clearPlaceMarkers() {
