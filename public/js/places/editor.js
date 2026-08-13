@@ -1,57 +1,32 @@
-// public/js/editor.js
-
-class PlaceEditor {
-    constructor() {
-        this.currentPlace = null;
-        this.isDirty = false;
-    }
-
+export const placeEditor = {
     init() {
-        this.bindEvents();
-    }
-
-    bindEvents() {
-        const form = document.getElementById('place-editor-form');
-        if (form) {
-            form.addEventListener('input', () => {
-                this.isDirty = true;
-            });
-        }
-    }
-
+        console.log("Place Editor initialized.");
+    },
     open(placeData = null) {
-        this.currentPlace = placeData;
-        this.isDirty = false;
-        
-        const modal = document.getElementById('editor-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            this.populateForm(placeData);
-        }
-    }
-
+        openPlaceEditor(placeData);
+    },
     close() {
-        const modal = document.getElementById('editor-modal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-        this.currentPlace = null;
-        this.isDirty = false;
+        closePlaceEditor();
+    }
+};
+
+export function openPlaceEditor(placeData = null) {
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalOverlay = document.getElementById('modal-overlay');
+
+    if (!modalOverlay || !modalBody) return;
+
+    if (modalTitle) {
+        modalTitle.textContent = placeData ? 'Edit Place' : 'Add New Place';
     }
 
-    populateForm(data) {
-        document.getElementById('place-name').value = data?.name || '';
-        document.getElementById('place-description').value = data?.description || '';
-        document.getElementById('place-category').value = data?.category || 'general';
-    }
-
-    getFormData() {
-        return {
-            name: document.getElementById('place-name').value,
-            description: document.getElementById('place-description').value,
-            category: document.getElementById('place-category').value
-        };
-    }
+    modalOverlay.classList.remove('overlay-hidden');
 }
 
-export const placeEditor = new PlaceEditor();
+export function closePlaceEditor() {
+    const modalOverlay = document.getElementById('modal-overlay');
+    if (modalOverlay) {
+        modalOverlay.classList.add('overlay-hidden');
+    }
+}
